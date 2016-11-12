@@ -4,42 +4,51 @@ import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.sandersoft.maximusmovies.views.ActivityMainFragment;
+import com.sandersoft.maximusmovies.views.MoviesViewFragment;
 
 public class ActivityMain extends AppCompatActivity {
 
     SearchView searchView;
     String searchPreval = "";
 
-    ActivityMainFragment mainFragment;
+    MoviesViewFragment mainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setActionBar(toolbar);
         setSupportActionBar(toolbar);
 
         //place the fragment in the container
-        mainFragment = new ActivityMainFragment();
+        mainFragment = new MoviesViewFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.main_fragment, mainFragment);
         //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         //ft.addToBackStack(null);
         ft.commit();
 
+        mainFragment.setAsWebListener();
         if (savedInstanceState == null) {
-            mainFragment.setAsWebListener();
             mainFragment.doMoviesRequest();
+        } else {
+            //mainFragment.movieController
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //outState.putParcelableArrayList("movies", mainFragment.movieController.getMovies());
     }
 
     @Override
@@ -77,11 +86,7 @@ public class ActivityMain extends AppCompatActivity {
                 }
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    if (newText.equals("") && searchPreval.length() > 1){
-                        searchView.setIconified(true);
-                        searchView.clearFocus();
-                        menu.findItem(R.id.search).collapseActionView();
-                    }
+                    if (newText.equals(searchPreval)) return false;
                     searchPreval = newText;
                     //do request with search value (even if its empty
                     mainFragment.doMoviesRequest(searchPreval);

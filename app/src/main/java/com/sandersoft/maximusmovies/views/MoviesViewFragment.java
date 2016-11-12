@@ -63,7 +63,7 @@ public class MoviesViewFragment extends Fragment {
                 //if (lst_movies.getScrollY() + lst_movies.getHeight() >= main_lista.getHeight()){
                 if (layoutmanager.findLastCompletelyVisibleItemPosition() == movieController.getMovies().size()-1) {
                     lst_movies.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
-                    movieController.doMoviesNextPageRequest();
+                    doMoviesNextPageRequest();
                 }
             }
         };
@@ -106,16 +106,22 @@ public class MoviesViewFragment extends Fragment {
      * Receive the response of a movies search
      */
     public void receiveMovies(int cant){
-        moviesAdapter.notifyData();
         //verifiy if there are more loadable items
-        if (movieController.getMovies().size() < cant)
+        if (movieController.getMovies().size() < cant) {
+            movieController.addLoadingElement();
             lst_movies.getViewTreeObserver().addOnScrollChangedListener(scrollListener);
+        }
+        //update the list
+        moviesAdapter.notifyData();
     }
     public void receiveMovieImages(int position){
         moviesAdapter.notifyItemChanged(position);
     }
 
-    public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder> {
+    public class MoviesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        private final int VIEW_TYPE_ITEM = 0;
+        private final int VIEW_TYPE_LOADING = 1;
 
         public class MoviesViewHolder extends RecyclerView.ViewHolder {
             public LinearLayout lay_movie_item;
@@ -131,39 +137,68 @@ public class MoviesViewFragment extends Fragment {
                 txt_year = (TextView) view.findViewById(R.id.txt_year);
             }
         }
+        public class LoadingViewHolder extends RecyclerView.ViewHolder {
+            public LinearLayout lay_loading;
+
+            public LoadingViewHolder(View view) {
+                super(view);
+                lay_loading = (LinearLayout) view.findViewById(R.id.lay_loading);
+            }
+        }
 
         public MoviesAdapter(){
         }
 
         @Override
-        public MoviesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_movies, parent, false);
-
-            return new MoviesViewHolder(itemView);
+        public int getItemViewType(int position) {
+            //use null object as a reference for a loading object in the list (it must be the last on the list)
+            return movieController.getMovies().size()-1 == position &&
+                    movieController.getMovies().get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
         }
 
         @Override
-        public void onBindViewHolder(final MoviesViewHolder holder, final int position) {
-            holder.txt_name.setText(movieController.getMovies().get(position).getTitle());
-            holder.txt_year.setText(String.valueOf(movieController.getMovies().get(position).getYear()));
-            holder.lay_movie_item.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(MoviesViewFragment.this.getActivity(),
-                            holder.txt_name.getText().toString()
-                                    + " " + movieController.getMovies().get(position).getIds().getTrakt()
-                                    + " " + movieController.getMovies().get(position).getIds().getTmdb(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-            //find images
-            if (movieController.getMovies().get(position).getPoster() != null)
-                holder.img_poster.setImageBitmap(movieController.getMovies().get(position).getPoster());
-            else {
-                holder.img_poster.setImageResource(R.mipmap.ic_launcher);
-                movieController.findImage(holder.img_poster, position);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (viewType == VIEW_TYPE_ITEM) {
+                View itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_movies, parent, false);
+                return new MoviesViewHolder(itemView);
+            } else if (viewType == VIEW_TYPE_LOADING){
+                View itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_loading, parent, false);
+                return new LoadingViewHolder(itemView);
             }
+            return null;
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+            //verify the type of element
+            if (holder instanceof MoviesViewHolder){
+                //cast holder to a movieholder
+                final MoviesViewHolder mh = (MoviesViewHolder) holder;
+                //set the values
+                mh.txt_name.setText(movieController.getMovies().get(position).getTitle());
+                mh.txt_year.setText(String.valueOf(movieController.getMovies().get(position).getYear()));
+                mh.lay_movie_item.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(MoviesViewFragment.this.getActivity(),
+                                mh.txt_name.getText().toString()
+                                        + " " + movieController.getMovies().get(position).getIds().getTrakt()
+                                        + " " + movieController.getMovies().get(position).getIds().getTmdb(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+                //find images
+                if (movieController.getMovies().get(position).getPoster() != null)
+                    mh.img_poster.setImageBitmap(movieController.getMovies().get(position).getPoster());
+                else {
+                    mh.img_poster.setImageResource(R.mipmap.ic_launcher);
+                    movieController.findImage(mh.img_poster, position);
+                }
+            } else if (holder instanceof LoadingViewHolder){
+            }
+
         }
 
         @Override

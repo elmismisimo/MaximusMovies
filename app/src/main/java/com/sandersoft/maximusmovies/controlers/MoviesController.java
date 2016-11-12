@@ -43,6 +43,11 @@ public class MoviesController implements WebManagerListener {
     public void clearMovies(){
         movies.clear();
     }
+    public void addLoadingElement(){
+        while (movies.contains(null))
+            movies.remove(null);
+        movies.add(null);
+    }
     public void findImage(ImageView imageHolder, int position){
         if (position >= movies.size() || movies.get(position).getPoster() != null) return;
         if (movies.get(position).getImages() == null)
@@ -91,6 +96,10 @@ public class MoviesController implements WebManagerListener {
         //verify if search is the same as latest
         if (!this.search.equals(search)) return;
         page = (page-1) * 10;
+        //verify if there is a loading element
+        //if (this.movies.size() > 0 && this.movies.get(this.movies.size()-1) == null)
+        while (this.movies.contains(null))
+            this.movies.remove(null);
         if (this.movies.size() > page)
             this.movies.subList(page, this.movies.size()).clear();
         this.movies.addAll(Arrays.asList(movies));

@@ -2,6 +2,8 @@ package com.sandersoft.maximusmovies.controlers;
 
 import android.app.Application;
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -20,18 +22,22 @@ import java.util.Comparator;
 /**
  * Created by Sander on 09/11/2016.
  */
-public class MoviesController implements WebManagerListener {
+public class MoviesController implements WebManagerListener, Parcelable {
 
     //the view of the controller
     MoviesViewFragment movieView;
     //the terms of the search of elements
     int page = 1;
+    int movieMaxCount = 0;
     String search = "";
 
     //list of movie models that will store the fetched elements
     ArrayList<MovieModel> movies = new ArrayList<>();
 
     public MoviesController(MoviesViewFragment caller){
+        setMovieView(caller);
+    }
+    public void setMovieView(MoviesViewFragment caller){
         movieView = caller;
     }
 
@@ -61,7 +67,11 @@ public class MoviesController implements WebManagerListener {
      * Empty the movie list
      */
     public void clearMovies(){
+        //clear the list
         movies.clear();
+        //return the movie count to 0
+        movieMaxCount = 0;
+        //add a null elemement as reference for loading element
         addLoadingElement();
     }
 
@@ -87,6 +97,10 @@ public class MoviesController implements WebManagerListener {
             doImagesRequest(String.valueOf(movies.get(position).getIds().getTmdb()), movies.get(position));
         else
             doImageRequest(movies.get(position));
+    }
+
+    public boolean canLoadMore(){
+        return movies.size() < movieMaxCount;
     }
 
     /**
@@ -145,6 +159,7 @@ public class MoviesController implements WebManagerListener {
         //verify if search is the same as latest
         if (!this.search.equals(search)) return;
         page = (page-1) * 10;
+        movieMaxCount = cant;
         //verify if there is a loading element
         while (this.movies.contains(null))
             this.movies.remove(null);
@@ -154,12 +169,17 @@ public class MoviesController implements WebManagerListener {
         //add all the elements from the list
         this.movies.addAll(Arrays.asList(movies));
         //notify the view that the movie list changed
-        movieView.receiveMovies(cant);
+        movieView.receiveMovies();
     }
     //receive an error of the movie fetch
     @Override
     public void onReceiveHttpAnswerError(String error) {
-        Log.e("MoviewController", error);
+        Log.e("MovieController", error);
+        //verify if there is a loading element
+        while (this.movies.contains(null))
+            this.movies.remove(null);
+        //notify the view that the movie list changed
+        movieView.receiveMovies();
     }
     //receive the images from TMDB
     @Override
@@ -181,4 +201,35 @@ public class MoviesController implements WebManagerListener {
             movieView.receiveMovieImages(movieIndex);
         }
     }
+
+
+    // Parcelling part
+    public MoviesController(Parcel in){
+        page = in.readInt();
+        movieMaxCount = in.readInt();
+        search = in.readString();
+        movies = in.readArrayList(MovieModel.class.getClassLoader());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(page);
+        dest.writeInt(movieMaxCount);
+        dest.writeString(search);
+        dest.writeList(movies);
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public MoviesController createFromParcel(Parcel in) {
+            return new MoviesController(in);
+        }
+
+        public MoviesController[] newArray(int size) {
+            return new MoviesController[size];
+        }
+    };
 }

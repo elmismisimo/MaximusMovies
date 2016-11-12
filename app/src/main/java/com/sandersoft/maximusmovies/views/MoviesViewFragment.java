@@ -48,8 +48,11 @@ public class MoviesViewFragment extends Fragment {
         lst_movies = (RecyclerView) rootview.findViewById(R.id.lst_movies);
 
         if (savedInstanceState != null){
-            ArrayList<MovieModel> movies = savedInstanceState.getParcelableArrayList("movies");
-            movieController.setMovies(movies);
+            movieController = savedInstanceState.getParcelable("moviecontroller");
+            movieController.setMovieView(this);
+            setAsWebListener();
+            //ArrayList<MovieModel> movies = savedInstanceState.getParcelableArrayList("movies");
+            //movieController.setMovies(movies);
         }
 
         //create the adapter for the list of movies
@@ -75,8 +78,8 @@ public class MoviesViewFragment extends Fragment {
         };
 
         if (savedInstanceState != null){
-            ArrayList<MovieModel> movies = savedInstanceState.getParcelableArrayList("movies");
-            movieController.setMovies(movies);
+            //recreates a call where movies are received, and places again the scrolllistener
+            receiveMovies();
         }
         //return the view for the activity to be shown
         return rootview;
@@ -86,7 +89,7 @@ public class MoviesViewFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //get objects backedup so we can reload the activity with the same infromation
-        outState.putParcelableArrayList("movies", movieController.getMovies());
+        outState.putParcelable("moviecontroller", movieController);
     }
 
     /**
@@ -131,8 +134,11 @@ public class MoviesViewFragment extends Fragment {
      * @param search
      */
     public void doMoviesRequest(String search){
-        //clear the current set of movies (thisn funciton always calls a new set
+        //clear the current set of movies (this function always calls a new set)
         movieController.clearMovies();
+        //remove the scroll listener of the list (if is set)
+        if (null != lst_movies)
+            lst_movies.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
         //notify the adapter to refresh the list
         if (moviesAdapter != null) moviesAdapter.notifyData();
         //do the request to the web service
@@ -149,9 +155,9 @@ public class MoviesViewFragment extends Fragment {
     /**
      * Receive the response of a movies search
      */
-    public void receiveMovies(int cant){
+    public void receiveMovies(){
         //verifiy if there are more loadable items
-        if (movieController.getMovies().size() < cant) {
+        if (movieController.canLoadMore()) {
             //add a null element to the list so it can be interpreted as a loading element
             movieController.addLoadingElement();
             //add a listener so when the scroll reaches bottom auto loads another set of movies

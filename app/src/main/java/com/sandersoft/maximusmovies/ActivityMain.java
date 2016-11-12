@@ -43,6 +43,7 @@ public class ActivityMain extends AppCompatActivity {
             //ft.addToBackStack(null);
             ft.commit();
         } else {
+            searchPreval = savedInstanceState.getString("search");
             mainFragment = (MoviesViewFragment) getFragmentManager().findFragmentByTag(TAG_MOVIE_FRAGMENT);
             //set the information from previews destroy so we can show it correctly
             //mainFragment.movieController.setMovies(savedInstanceState.getParcelableArrayList("movies"));
@@ -58,6 +59,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putString("search", searchPreval);
     }
 
     @Override
@@ -79,8 +81,8 @@ public class ActivityMain extends AppCompatActivity {
     public void defineSearchView(final Menu menu){
 
         // Associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        MenuItem searchItem = menu.findItem(R.id.search);
+        searchView = (SearchView) searchItem.getActionView();
         if (searchView != null) {
             searchView.setIconifiedByDefault(false);
             //searchView.setFocusable(true);
@@ -102,6 +104,12 @@ public class ActivityMain extends AppCompatActivity {
                     return false;
                 }
             });
+            //verificamos una consulta previa
+            if (!searchPreval.isEmpty()){
+                searchItem.expandActionView();
+                searchView.setQuery(searchPreval, false);
+                searchView.clearFocus();
+            }
         }
     }
 

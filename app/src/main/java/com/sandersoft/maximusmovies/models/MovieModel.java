@@ -35,7 +35,7 @@ public class MovieModel implements Parcelable {
     private Bitmap poster;
 
     /**
-     * Empty contructor so the json instantiation can take place
+     * Empty contructor so the json serialization
      */
     public MovieModel(){}
 
@@ -188,19 +188,19 @@ public class MovieModel implements Parcelable {
         title = in.readString();
         year = in.readInt();
         ids = in.readParcelable(Ids.class.getClassLoader());
-        tagline = in.readString();
+        //tagline = in.readString();
         overview = in.readString();
-        released = in.readString();
-        runtime = in.readInt();
+        //released = in.readString();
+        //runtime = in.readInt();
         trailer = in.readString();
-        homepage = in.readParcelable(Object.class.getClassLoader());
-        rating = in.readDouble();
-        votes = in.readInt();
-        updated_at = in.readString();
-        language = in.readString();
-        available_translations = in.readArrayList(String.class.getClassLoader());
-        genres = in.readArrayList(String.class.getClassLoader());
-        certification = in.readParcelable(Object.class.getClassLoader());
+        //homepage = in.readParcelable(Object.class.getClassLoader());
+        //rating = in.readDouble();
+        //votes = in.readInt();
+        //updated_at = in.readString();
+        //language = in.readString();
+        //available_translations = in.readArrayList(String.class.getClassLoader());
+        //genres = in.readArrayList(String.class.getClassLoader());
+        //certification = in.readParcelable(Object.class.getClassLoader());
         images = in.readParcelable(Images.class.getClassLoader());
         poster = in.readParcelable(Bitmap.class.getClassLoader());
     }
@@ -213,6 +213,12 @@ public class MovieModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(title);
+        dest.writeInt(year);
+        dest.writeParcelable(ids, flags);
+        dest.writeString(overview);
+        dest.writeString(trailer);
+        dest.writeParcelable(images, flags);
+        dest.writeParcelable(poster, flags);
     }
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public MovieModel createFromParcel(Parcel in) {

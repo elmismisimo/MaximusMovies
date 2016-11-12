@@ -3,6 +3,7 @@ package com.sandersoft.maximusmovies;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
+import android.graphics.Movie;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.sandersoft.maximusmovies.models.MovieModel;
 import com.sandersoft.maximusmovies.views.MoviesViewFragment;
+
+import java.util.ArrayList;
 
 public class ActivityMain extends AppCompatActivity {
 
@@ -21,6 +25,7 @@ public class ActivityMain extends AppCompatActivity {
     String searchPreval = "";
 
     MoviesViewFragment mainFragment;
+    private static final String TAG_MOVIE_FRAGMENT = "movieListFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,25 +35,29 @@ public class ActivityMain extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //place the fragment in the container
-        mainFragment = new MoviesViewFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.main_fragment, mainFragment);
-        //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        //ft.addToBackStack(null);
-        ft.commit();
-
+        if (savedInstanceState == null) {
+            mainFragment = new MoviesViewFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.main_fragment, mainFragment, TAG_MOVIE_FRAGMENT);
+            //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            //ft.addToBackStack(null);
+            ft.commit();
+        } else {
+            mainFragment = (MoviesViewFragment) getFragmentManager().findFragmentByTag(TAG_MOVIE_FRAGMENT);
+            //set the information from previews destroy so we can show it correctly
+            //mainFragment.movieController.setMovies(savedInstanceState.getParcelableArrayList("movies"));
+        }
         mainFragment.setAsWebListener();
+
+        //if is first load, request the movies
         if (savedInstanceState == null) {
             mainFragment.doMoviesRequest();
-        } else {
-            //mainFragment.movieController
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //outState.putParcelableArrayList("movies", mainFragment.movieController.getMovies());
     }
 
     @Override

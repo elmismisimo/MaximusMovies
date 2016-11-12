@@ -29,47 +29,87 @@ import org.springframework.web.client.RestTemplate;
  */
 public class WebManager {
 
+    //the weblistener at whom this controll will report
     private WebManagerListener webManagerListener;
+    //the instance of the movie fetch task, so this can be cancelled anytime
     private GetMoviesTask getMoviesTask;
 
     public WebManager(){
 
     }
 
+    /**
+     * Define the weblistener that this controll will report
+     * @param webManagerListener the controll listener
+     */
     public void setWebManagerListener(WebManagerListener webManagerListener) {
         this.webManagerListener = webManagerListener;
     }
 
+    /**
+     * Prepare and execute a multiple movie fetch request
+     * @param params the params for the request
+     * @param search the search of the request (if any)
+     */
     public void doMoviesRequest(String params, String search){
+        //if there is a ongoing fetch task, cancell it
         if (getMoviesTask != null){
             getMoviesTask.cancel(true);
             getMoviesTask = null;
         }
+        //create a new fetch task
         getMoviesTask = new GetMoviesTask();
+        //execute the task
         getMoviesTask.execute(params,search);
-        //doImagesRequest("308266");
     }
+    /**
+     * Prepare and execute a single movie fetch
+     * @param params the params
+     */
     public void doMovieRequest(String params){
         new GetMoviesTask().execute(params);
     }
+    /**
+     * Prepare and executes a movie images list request
+     * @param tmdb_id the id of the movie in TMDB website
+     * @param movie the movie object that will receive the image list
+     */
     public void doImagesRequest(String tmdb_id, MovieModel movie){
         new GetImagesTask(movie).execute(tmdb_id);
     }
+    /**
+     * Prepares and execute a bitmap movie image request
+     * @param imageHolder The ImageView that 'could' hold the image
+     * @param movie the movie object that will receive the image
+     * @param size the size of the image (w185,w500,original are preferred)
+     */
     public void doImageRequest(ImageView imageHolder, MovieModel movie, String size){
-        //verify if the image exist
+        //verify if the image url exists in the poster list
         if (movie.getImages().getPosters().size() > 0)
             new GetImageTask(imageHolder, movie).execute(movie.getImages().getPosters().get(0).getFile_path(), size);
+        //verify if the image url exists in the backdrops list
         else if (movie.getImages().getBackdrops().size() > 0)
             new GetImageTask(imageHolder, movie).execute(movie.getImages().getBackdrops().get(0).getFile_path(), size);
     }
 
+    /**
+     * AsyncTask that fetches the movies
+     */
     private class GetMoviesTask extends AsyncTask<String, Void, ResponseEntity> {
         String search="";
+        boolean multiple = false;
+        //instantiate the current listener, so the old responses never goes to newlly registered controllers
+        WebManagerListener currWebListener = webManagerListener;
 
         @Override
         protected ResponseEntity doInBackground(String... params) {
             try {
-                search = params[1];
+                //verify if the request has a search term (this defines if is a multiple fetch)
+                if (params.length > 1) {
+                    search = params[1];
+                    multiple = true;
+                }
+                //create the url
                 String url = Globals.MOVIES_URL + params[0] + search;
                 //define the spring request
                 RestTemplate restTemplate = new RestTemplate();
@@ -81,23 +121,11 @@ public class WebManager {
                 HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
                 //we add the converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                //restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-                //do the request
-                //MovieModel movie = restTemplate.getForObject(url, MovieModel.class);
-                //ResponseEntity<MovieModel> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, MovieModel.class);
-                ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, MovieModel[].class);
-                //request the images
-                /*for (MovieModel m : (MovieModel[]) response.getBody()){
-                    url = Globals.TMSB_IMAGES_URL.replace("***", String.valueOf(m.getIds().getTmdb())) + Globals.TMDB_ID;
-                    //define the spring request
-                    restTemplate = new RestTemplate();
-                    //we add the converter
-                    restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                    //do the request
-                    m.setImages(restTemplate.getForObject(url, Images.class));
-                }*/
+                //do the request (depending if its multiple or not, the receiving class changes)
+                ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, multiple ? MovieModel[].class : MovieModel.class);
                 return response;
             } catch (HttpClientErrorException e){
+                //return the error response
                 return new ResponseEntity(e.getMessage(), e.getStatusCode());
             } catch (Exception e) {
                 Log.e("WebRequest", e.getMessage(), e);
@@ -108,9 +136,12 @@ public class WebManager {
 
         @Override
         protected void onPostExecute(ResponseEntity response) {
-            if (webManagerListener != null && response != null) {
+            //verify if there is a weblistener and if the response is diferent to null
+            if (currWebListener != null && response != null) {
+                //verify if the request was successfull
                 if (response.getStatusCode().equals(HttpStatus.OK)) {
-                    try{
+                    //verify if its aa multiple fetch
+                    if (multiple){
                         //get the amount of records
                         int c = 0;
                         try{c = new Integer(response.getHeaders().getFirst("x-pagination-item-count"));
@@ -120,21 +151,26 @@ public class WebManager {
                         try{p = new Integer(response.getHeaders().getFirst("x-pagination-page"));
                         } catch (Exception ex){}
                         //return the movies
-                        webManagerListener.onReceiveHttpAnswer((MovieModel[]) response.getBody(), c, p, search);
-                    } catch (Exception ex){
+                        currWebListener.onReceiveHttpAnswer((MovieModel[]) response.getBody(), c, p, search);
+                    } else{
                         //return the movie
-                        webManagerListener.onReceiveHttpAnswer(new MovieModel[]{(MovieModel)response.getBody()}, 1, 1, "");
+                        currWebListener.onReceiveHttpAnswer(new MovieModel[]{(MovieModel)response.getBody()}, 1, 1, "");
                     }
-                    //webManagerListener.onReceiveHttpAnswer(movie);
                 } else {
-                    webManagerListener.onReceiveHttpAnswerError(response.getStatusCode() + ": " + response.getBody().toString());
+                    //return the error
+                    currWebListener.onReceiveHttpAnswerError(response.getStatusCode() + ": " + response.getBody().toString());
                 }
             }
         }
     }
 
+    /**
+     * AsyncTask that fetches the list ulr_images
+     */
     private class GetImagesTask extends AsyncTask<String, Void, Images> {
         MovieModel movie;
+        //instantiate the current listener, so the old responses never goes to newlly registered controllers
+        WebManagerListener currWebListener = webManagerListener;
 
         public GetImagesTask(MovieModel movie) {
             this.movie = movie;
@@ -143,6 +179,7 @@ public class WebManager {
         @Override
         protected Images doInBackground(String... params) {
             try {
+                //generate the url
                 final String url = Globals.TMSB_IMAGES_URL.replace("***", params[0]) + Globals.TMDB_ID;
                 //define the spring request
                 RestTemplate restTemplate = new RestTemplate();
@@ -160,15 +197,22 @@ public class WebManager {
 
         @Override
         protected void onPostExecute(Images response) {
-            if (webManagerListener != null) {
-                webManagerListener.onReceiveHttpTMDB(response, movie);
+            //verify if there is a weblistener registered
+            if (currWebListener != null) {
+                //return the image list with the movie object
+                currWebListener.onReceiveHttpTMDB(response, movie);
             }
         }
     }
 
+    /**
+     * AsyncTask that fetches a bitmap image from the web
+     */
     private class GetImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView imageHolder;
         MovieModel movie;
+        //instantiate the current listener, so the old responses never goes to newlly registered controllers
+        WebManagerListener currWebListener = webManagerListener;
 
         public GetImageTask(ImageView imageHolder, MovieModel movie) {
             this.imageHolder = imageHolder;
@@ -178,16 +222,19 @@ public class WebManager {
         @Override
         protected Bitmap doInBackground(String... params) {
             try {
+                //generate the url
                 final String url = Globals.TMSB_IMAGE_URL.replace("***", params[1]) + params[0];
                 //define the spring request
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
                 restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
                 restTemplate.getMessageConverters().add(new ResourceHttpMessageConverter());
-                //do the request
+                //define the headders
                 HttpHeaders requestHeaders = new HttpHeaders();
                 HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
+                //do the request
                 ResponseEntity<Resource> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Resource.class);
+                //convert the response to bitmap
                 Bitmap bitmap = BitmapFactory.decodeStream(response.getBody().getInputStream());
                 return bitmap;
             } catch (Exception e) {
@@ -198,9 +245,11 @@ public class WebManager {
         }
 
         @Override
-        protected void onPostExecute(Bitmap response) {
-            if (webManagerListener != null) {
-                webManagerListener.onReceiveHttpTMDBImage(response, movie);
+        protected void onPostExecute(Bitmap image) {
+            //verify if there is a weblisterner
+            if (currWebListener != null) {
+                //return the bitmap image with the movie object
+                currWebListener.onReceiveHttpTMDBImage(image, movie);
             }
         }
     }

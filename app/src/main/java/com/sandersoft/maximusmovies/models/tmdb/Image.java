@@ -1,9 +1,12 @@
 package com.sandersoft.maximusmovies.models.tmdb;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Sander on 10/11/2016.
  */
-public class Image {
+public class Image implements Parcelable {
     private Double aspect_ratio;
     private String file_path;
     private Integer height;
@@ -11,6 +14,11 @@ public class Image {
     private Double vote_average;
     private Integer vote_count;
     private Integer width;
+
+    /**
+     * Empty contructor for the json serialization
+     */
+    public Image(){}
 
     public Double getAspect_ratio() {
         return aspect_ratio;
@@ -67,4 +75,29 @@ public class Image {
     public void setWidth(Integer width) {
         this.width = width;
     }
+
+
+    // Parcelling part
+    public Image(Parcel in){
+        file_path = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(file_path);
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Image createFromParcel(Parcel in) {
+            return new Image(in);
+        }
+
+        public Image[] newArray(int size) {
+            return new Image[size];
+        }
+    };
 }

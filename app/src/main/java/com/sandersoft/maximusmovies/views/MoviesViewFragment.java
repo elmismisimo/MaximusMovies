@@ -30,11 +30,10 @@ import java.util.List;
  */
 public class MoviesViewFragment extends Fragment {
 
-    RecyclerView lst_movies;
+    //Controller that handles action on the movies
     public MoviesController movieController;
 
-    String list = "popular";
-
+    RecyclerView lst_movies;
     MoviesAdapter moviesAdapter;
     OnScrollChangedListener scrollListener;
 
@@ -47,35 +46,79 @@ public class MoviesViewFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootview = inflater.inflate(R.layout.fragment_movies_view, container, false);
         lst_movies = (RecyclerView) rootview.findViewById(R.id.lst_movies);
-        //TODO buscamos una imagen (boorar esta instruccion)
-        //doImageRequest("aqhAqttDq7zgsTaBHtCD8wmTk6k.jpg");
 
+        if (savedInstanceState != null){
+            ArrayList<MovieModel> movies = savedInstanceState.getParcelableArrayList("movies");
+            movieController.setMovies(movies);
+        }
+
+        //create the adapter for the list of movies
         moviesAdapter = new MoviesAdapter();
-        final LinearLayoutManager layoutmanager
-                = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        lst_movies.setLayoutManager(layoutmanager);
+        //set the vertical layout so the list is displayed top down
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        lst_movies.setLayoutManager(layoutManager);
+        //set the adapter
         lst_movies.setAdapter(moviesAdapter);
-
+        //create a scroll listener for the reciclerview, that will check if the list reached bottom
+        //this will be added to the list when the first elements are received (check receiveMovies(int cant))
         scrollListener = new OnScrollChangedListener() {
             @Override
             public void onScrollChanged() {
-                //verificamos si llego al final de la lista y carga nuevos elementos automaticamente
-                //if (lst_movies.getScrollY() + lst_movies.getHeight() >= main_lista.getHeight()){
-                if (layoutmanager.findLastCompletelyVisibleItemPosition() == movieController.getMovies().size()-1) {
+                //verify if the list reached the end and load new elements automatically
+                if (layoutManager.findLastCompletelyVisibleItemPosition() == movieController.getMovies().size()-1) {
+                    //remove the scroll listener from the list while is loading
                     lst_movies.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
+                    //request the next set of the movies
                     doMoviesNextPageRequest();
                 }
             }
         };
 
+        if (savedInstanceState != null){
+            ArrayList<MovieModel> movies = savedInstanceState.getParcelableArrayList("movies");
+            movieController.setMovies(movies);
+        }
+        //return the view for the activity to be shown
         return rootview;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //get objects backedup so we can reload the activity with the same infromation
+        outState.putParcelableArrayList("movies", movieController.getMovies());
+    }
 
-
+    /**
+     * Define this class as the Weblistener for the WebManager
+     */
     public void setAsWebListener(){
         movieController.setAsWebListener();
     }
+
+    /**
+     * Handle the selecion of an element
+     * @param position the position of the element on the list
+     */
+    public void elementClicked(int position){
+        Toast.makeText(MoviesViewFragment.this.getActivity(),
+                movieController.getMovies().get(position).getTitle()
+                        + " " + movieController.getMovies().get(position).getIds().getTrakt()
+                        + " " + movieController.getMovies().get(position).getIds().getTmdb(),
+                Toast.LENGTH_SHORT).show();
+    }
+    /**
+     * Handle the long click of an element
+     * @param position the position of the element on the list
+     */
+    public void elementLongClicked(int position){
+        Toast.makeText(MoviesViewFragment.this.getActivity(), "LONG: " +
+                movieController.getMovies().get(position).getTitle()
+                        + " " + movieController.getMovies().get(position).getIds().getTrakt()
+                        + " " + movieController.getMovies().get(position).getIds().getTmdb(),
+                Toast.LENGTH_SHORT).show();
+    }
+
 
     /**
      * Request the first page of movies
@@ -83,22 +126,23 @@ public class MoviesViewFragment extends Fragment {
     public void doMoviesRequest(){
         doMoviesRequest("");
     }
-
     /**
      * Request the first page of movies using a search
      * @param search
      */
     public void doMoviesRequest(String search){
+        //clear the current set of movies (thisn funciton always calls a new set
         movieController.clearMovies();
-        if (moviesAdapter != null)
-            moviesAdapter.notifyData();
-        movieController.doMoviesRequest(search,list);
+        //notify the adapter to refresh the list
+        if (moviesAdapter != null) moviesAdapter.notifyData();
+        //do the request to the web service
+        movieController.doMoviesRequest(search);
     }
-
     /**
      * request the next page of the last movies search
      */
     public void doMoviesNextPageRequest(){
+        //do the request of the nezxt set
         movieController.doMoviesNextPageRequest();
     }
 
@@ -108,16 +152,26 @@ public class MoviesViewFragment extends Fragment {
     public void receiveMovies(int cant){
         //verifiy if there are more loadable items
         if (movieController.getMovies().size() < cant) {
+            //add a null element to the list so it can be interpreted as a loading element
             movieController.addLoadingElement();
+            //add a listener so when the scroll reaches bottom auto loads another set of movies
             lst_movies.getViewTreeObserver().addOnScrollChangedListener(scrollListener);
         }
         //update the list
         moviesAdapter.notifyData();
     }
+    /**
+     * Receive a notification that the images of a certain movie has been updated
+     * @param position the position of the movie on the list
+     */
     public void receiveMovieImages(int position){
+        //request the adapter to update the movie in the position "position" of the list
         moviesAdapter.notifyItemChanged(position);
     }
 
+    /**
+     * Adapter that handles the display of the movies in the list
+     */
     public class MoviesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private final int VIEW_TYPE_ITEM = 0;
@@ -144,9 +198,6 @@ public class MoviesViewFragment extends Fragment {
                 super(view);
                 lay_loading = (LinearLayout) view.findViewById(R.id.lay_loading);
             }
-        }
-
-        public MoviesAdapter(){
         }
 
         @Override
@@ -182,19 +233,24 @@ public class MoviesViewFragment extends Fragment {
                 mh.lay_movie_item.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(MoviesViewFragment.this.getActivity(),
-                                mh.txt_name.getText().toString()
-                                        + " " + movieController.getMovies().get(position).getIds().getTrakt()
-                                        + " " + movieController.getMovies().get(position).getIds().getTmdb(),
-                                Toast.LENGTH_SHORT).show();
+                        elementClicked(position);
                     }
                 });
-                //find images
+                mh.lay_movie_item.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        elementLongClicked(position);
+                        return true;
+                    }
+                });
+                //find images (if poster is already in the movie, doesnt fetch it from tmdb, just from the object)
                 if (movieController.getMovies().get(position).getPoster() != null)
                     mh.img_poster.setImageBitmap(movieController.getMovies().get(position).getPoster());
                 else {
+                    //place app image as preview of the poster (just placing something)
                     mh.img_poster.setImageResource(R.mipmap.ic_launcher);
-                    movieController.findImage(mh.img_poster, position);
+                    //go fetch the image from tmdb
+                    movieController.findImage(position);
                 }
             } else if (holder instanceof LoadingViewHolder){
             }

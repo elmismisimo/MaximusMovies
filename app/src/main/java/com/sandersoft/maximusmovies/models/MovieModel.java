@@ -1,12 +1,19 @@
 package com.sandersoft.maximusmovies.models;
 
+import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.sandersoft.maximusmovies.models.tmdb.Images;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Sander on 09/11/2016.
  */
-public class MovieModel {
+public class MovieModel implements Parcelable {
 
     private String title;
     private Integer year;
@@ -24,6 +31,13 @@ public class MovieModel {
     private List<String> available_translations = new ArrayList<String>();
     private List<String> genres = new ArrayList<String>();
     private Object certification;
+    private Images images;
+    private Bitmap poster;
+
+    /**
+     * Empty contructor so the json serialization
+     */
+    public MovieModel(){}
 
     public String getTitle() {
         return title;
@@ -152,4 +166,67 @@ public class MovieModel {
     public void setCertification(Object certification) {
         this.certification = certification;
     }
+
+    public Images getImages() {
+        return images;
+    }
+
+    public void setImages(Images images) {
+        this.images = images;
+    }
+
+    public Bitmap getPoster() {
+        return poster;
+    }
+
+    public void setPoster(Bitmap poster) {
+        this.poster = poster;
+    }
+
+    // Parcelling part
+    public MovieModel(Parcel in){
+        title = in.readString();
+        year = in.readInt();
+        ids = in.readParcelable(Ids.class.getClassLoader());
+        //tagline = in.readString();
+        overview = in.readString();
+        //released = in.readString();
+        //runtime = in.readInt();
+        trailer = in.readString();
+        //homepage = in.readParcelable(Object.class.getClassLoader());
+        //rating = in.readDouble();
+        //votes = in.readInt();
+        //updated_at = in.readString();
+        //language = in.readString();
+        //available_translations = in.readArrayList(String.class.getClassLoader());
+        //genres = in.readArrayList(String.class.getClassLoader());
+        //certification = in.readParcelable(Object.class.getClassLoader());
+        images = in.readParcelable(Images.class.getClassLoader());
+        poster = in.readParcelable(Bitmap.class.getClassLoader());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeInt(year);
+        dest.writeParcelable(ids, flags);
+        dest.writeString(overview);
+        dest.writeString(trailer);
+        dest.writeParcelable(images, flags);
+        dest.writeParcelable(poster, flags);
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public MovieModel createFromParcel(Parcel in) {
+            return new MovieModel(in);
+        }
+
+        public MovieModel[] newArray(int size) {
+            return new MovieModel[size];
+        }
+    };
 }

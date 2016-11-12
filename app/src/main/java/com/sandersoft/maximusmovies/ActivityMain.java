@@ -3,43 +3,63 @@ package com.sandersoft.maximusmovies;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
+import android.graphics.Movie;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.sandersoft.maximusmovies.views.ActivityMainFragment;
+import com.sandersoft.maximusmovies.models.MovieModel;
+import com.sandersoft.maximusmovies.views.MoviesViewFragment;
+
+import java.util.ArrayList;
 
 public class ActivityMain extends AppCompatActivity {
 
     SearchView searchView;
     String searchPreval = "";
 
-    ActivityMainFragment mainFragment;
+    MoviesViewFragment mainFragment;
+    private static final String TAG_MOVIE_FRAGMENT = "movieListFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setActionBar(toolbar);
         setSupportActionBar(toolbar);
 
         //place the fragment in the container
-        mainFragment = new ActivityMainFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.main_fragment, mainFragment);
-        //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        //ft.addToBackStack(null);
-        ft.commit();
-
         if (savedInstanceState == null) {
-            mainFragment.setAsWebListener();
+            mainFragment = new MoviesViewFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.main_fragment, mainFragment, TAG_MOVIE_FRAGMENT);
+            //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            //ft.addToBackStack(null);
+            ft.commit();
+        } else {
+            searchPreval = savedInstanceState.getString("search");
+            mainFragment = (MoviesViewFragment) getFragmentManager().findFragmentByTag(TAG_MOVIE_FRAGMENT);
+            //set the information from previews destroy so we can show it correctly
+            //mainFragment.movieController.setMovies(savedInstanceState.getParcelableArrayList("movies"));
+        }
+        mainFragment.setAsWebListener();
+
+        //if is first load, request the movies
+        if (savedInstanceState == null) {
             mainFragment.doMoviesRequest();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("search", searchPreval);
     }
 
     @Override
@@ -61,8 +81,8 @@ public class ActivityMain extends AppCompatActivity {
     public void defineSearchView(final Menu menu){
 
         // Associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        MenuItem searchItem = menu.findItem(R.id.search);
+        searchView = (SearchView) searchItem.getActionView();
         if (searchView != null) {
             searchView.setIconifiedByDefault(false);
             //searchView.setFocusable(true);
@@ -77,17 +97,19 @@ public class ActivityMain extends AppCompatActivity {
                 }
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    if (newText.equals("") && searchPreval.length() > 1){
-                        searchView.setIconified(true);
-                        searchView.clearFocus();
-                        menu.findItem(R.id.search).collapseActionView();
-                    }
+                    if (newText.equals(searchPreval)) return false;
                     searchPreval = newText;
                     //do request with search value (even if its empty
                     mainFragment.doMoviesRequest(searchPreval);
                     return false;
                 }
             });
+            //verificamos una consulta previa
+            if (!searchPreval.isEmpty()){
+                searchItem.expandActionView();
+                searchView.setQuery(searchPreval, false);
+                searchView.clearFocus();
+            }
         }
     }
 

@@ -71,7 +71,6 @@ public class ActivityMain extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_activity_main, menu);
 
         defineSearchView(menu);
-        //searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
     }
 

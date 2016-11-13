@@ -51,7 +51,9 @@ public class WebManager {
      * @param params the params for the request
      * @param search the search of the request (if any)
      */
-    public void doMoviesRequest(String params, String search){
+    public void doMoviesRequest(WebManagerListener controller, String params, String search){
+        //define the controller as the webListener
+        webManagerListener = controller;
         //if there is a ongoing fetch task, cancell it
         if (getMoviesTask != null){
             getMoviesTask.cancel(true);
@@ -66,7 +68,9 @@ public class WebManager {
      * Prepare and execute a single movie fetch
      * @param params the params
      */
-    public void doMovieRequest(String params){
+    public void doMovieRequest(WebManagerListener controller, String params){
+        //define the controller as the webListener
+        webManagerListener = controller;
         new GetMoviesTask().execute(params);
     }
     /**
@@ -74,7 +78,9 @@ public class WebManager {
      * @param tmdb_id the id of the movie in TMDB website
      * @param movie the movie object that will receive the image list
      */
-    public void doImagesRequest(String tmdb_id, MovieModel movie){
+    public void doImagesRequest(WebManagerListener controller, String tmdb_id, MovieModel movie){
+        //define the controller as the webListener
+        webManagerListener = controller;
         new GetImagesTask(movie).execute(tmdb_id);
     }
     /**
@@ -83,13 +89,20 @@ public class WebManager {
      * @param movie the movie object that will receive the image
      * @param size the size of the image (w185,w500,original are preferred)
      */
-    public void doImageRequest(ImageView imageHolder, MovieModel movie, String size){
+    public void doImageRequest(WebManagerListener controller, ImageView imageHolder, MovieModel movie, String size){
+        //define the controller as the webListener
+        webManagerListener = controller;
         //verify if the image url exists in the poster list
         if (movie.getImages().getPosters().size() > 0)
             new GetImageTask(imageHolder, movie).execute(movie.getImages().getPosters().get(0).getFile_path(), size);
         //verify if the image url exists in the backdrops list
         else if (movie.getImages().getBackdrops().size() > 0)
             new GetImageTask(imageHolder, movie).execute(movie.getImages().getBackdrops().get(0).getFile_path(), size);
+    }
+    public void doImageRequest(WebManagerListener controller, ImageView imageHolder, String image_url, String size) {
+        //define the controller as the webListener
+        webManagerListener = controller;
+        new GetImageTask(imageHolder, null).execute(image_url, size);
     }
 
     /**
@@ -235,8 +248,8 @@ public class WebManager {
                 //do the request
                 ResponseEntity<Resource> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Resource.class);
                 //convert the response to bitmap
-                Bitmap bitmap = BitmapFactory.decodeStream(response.getBody().getInputStream());
-                return bitmap;
+                if (response.getBody() != null)
+                    return BitmapFactory.decodeStream(response.getBody().getInputStream());
             } catch (Exception e) {
                 Log.e("WebRequest", e.getMessage(), e);
             }
@@ -247,9 +260,9 @@ public class WebManager {
         @Override
         protected void onPostExecute(Bitmap image) {
             //verify if there is a weblisterner
-            if (currWebListener != null) {
+            if (currWebListener != null && image != null) {
                 //return the bitmap image with the movie object
-                currWebListener.onReceiveHttpTMDBImage(image, movie);
+                currWebListener.onReceiveHttpTMDBImage(image, movie, imageHolder);
             }
         }
     }

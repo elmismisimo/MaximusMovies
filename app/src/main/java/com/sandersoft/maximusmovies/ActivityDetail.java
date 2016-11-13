@@ -4,6 +4,7 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.sandersoft.maximusmovies.models.MovieModel;
 import com.sandersoft.maximusmovies.utils.Globals;
 import com.sandersoft.maximusmovies.views.MovieDetailViewFragment;
 
@@ -20,7 +21,12 @@ public class ActivityDetail extends AppCompatActivity {
 
         //place the fragment in the container
         if (savedInstanceState == null) {
+            //get the info from the caller activity
+            Bundle extras = getIntent().getExtras();
+            MovieModel movie = extras.getParcelable(Globals.MOVIE_OBJ_TAG);
+
             detailFragment = new MovieDetailViewFragment();
+            detailFragment.setMovieObject(movie);
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.detail_fragment, detailFragment, Globals.TAG_MOVIE_DETAIL_FRAGMENT);
             //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -29,12 +35,7 @@ public class ActivityDetail extends AppCompatActivity {
         } else {
             detailFragment = (MovieDetailViewFragment) getFragmentManager().findFragmentByTag(Globals.TAG_MOVIE_DETAIL_FRAGMENT);
         }
-        //detailFragment.setAsWebListener();
-
-        //if is first load, request the movies
-        //if (savedInstanceState == null) {
-            //detailFragment.doMoviesRequest();
-        //}
+        detailFragment.setAsWebListener();
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ActivityDetail extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         //we define the controller of the fragment as the web listener for all the incoming requests
-        //detailFragment.setAsWebListener();
+        detailFragment.setAsWebListener();
     }
 
 }

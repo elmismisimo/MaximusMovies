@@ -20,4 +20,5 @@ public class Globals {
     public static final String TAG_MOVIE_FRAGMENT = "movieDetailFragment";
     public static final String TAG_MOVIE_DETAIL_FRAGMENT = "movieDetailFragment";
     public static final String MOVIE_CONTROLLER_TAG = "movieController";
+    public static final String MOVIE_OBJ_TAG = "movieObject";
 }

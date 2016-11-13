@@ -2,6 +2,7 @@ package com.sandersoft.maximusmovies.views;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
+import com.sandersoft.maximusmovies.ActivityDetail;
 import com.sandersoft.maximusmovies.ActivityMain;
 import com.sandersoft.maximusmovies.ApplicationMain;
 import com.sandersoft.maximusmovies.R;
@@ -106,11 +108,16 @@ public class MoviesViewFragment extends Fragment {
      * @param position the position of the element on the list
      */
     public void elementClicked(int position){
-        Toast.makeText(MoviesViewFragment.this.getActivity(),
+        /*Toast.makeText(MoviesViewFragment.this.getActivity(),
                 movieController.getMovies().get(position).getTitle()
                         + " " + movieController.getMovies().get(position).getIds().getTrakt()
                         + " " + movieController.getMovies().get(position).getIds().getTmdb(),
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
+        Intent openDetail = new Intent(getActivity(), ActivityDetail.class);
+        Bundle extras = new Bundle();
+        extras.putParcelable(Globals.MOVIE_OBJ_TAG, movieController.getMovies().get(position));
+        openDetail.putExtras(extras);
+        startActivity(openDetail);
     }
     /**
      * Handle the long click of an element

@@ -111,7 +111,7 @@ public class MoviesController implements WebManagerListener, Parcelable {
         this.page = 1; //set the page as the initial one
         this.search = search; //define the latest search term
         //do the movies request
-        ApplicationMain.webManager.doMoviesRequest("popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
+        ApplicationMain.webManager.doMoviesRequest(this, "popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
     }
     /**
      * Do a movies request for the next page of the last request
@@ -120,7 +120,7 @@ public class MoviesController implements WebManagerListener, Parcelable {
         //increment the page by one to get new page
         page++;
         //do movies request
-        ApplicationMain.webManager.doMoviesRequest("popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
+        ApplicationMain.webManager.doMoviesRequest(this, "popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
     }
     /**
      * Request the set of url of the images from the movie, it fetches them fomr TMDB
@@ -128,7 +128,7 @@ public class MoviesController implements WebManagerListener, Parcelable {
      * @param movie Movie that will receive the images
      */
     public void doImagesRequest(String tmdb_id, MovieModel movie){
-        ApplicationMain.webManager.doImagesRequest(tmdb_id, movie);
+        ApplicationMain.webManager.doImagesRequest(this, tmdb_id, movie);
     }
     /**
      * Request a bitmap image from TMDB with the lowest setting available (w185)
@@ -145,12 +145,7 @@ public class MoviesController implements WebManagerListener, Parcelable {
      */
     public void doImageRequest(MovieModel movie, String size){
         //executes the fetch (the first param ImageView is null because we dont need it, but the funtion requires it)
-        ApplicationMain.webManager.doImageRequest(null, movie, size);
-    }
-
-    //TODO delete this funciton, it must be in the MovieDetalController
-    public void doMovieRequest(String traktId){
-        ApplicationMain.webManager.doMovieRequest(traktId + "?extended=full");
+        ApplicationMain.webManager.doImageRequest(this, null, movie, size);
     }
 
     //receive the movies result
@@ -194,7 +189,7 @@ public class MoviesController implements WebManagerListener, Parcelable {
     }
     //receive bitmap image from TMDB
     @Override
-    public void onReceiveHttpTMDBImage(Bitmap image, MovieModel movie) {
+    public void onReceiveHttpTMDBImage(Bitmap image, MovieModel movie, ImageView imageHolder) {
         int movieIndex = movies.lastIndexOf(movie);
         if (movieIndex != -1) {
             movie.setPoster(image);

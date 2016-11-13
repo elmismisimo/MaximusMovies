@@ -1,6 +1,7 @@
 package com.sandersoft.maximusmovies.interfaces;
 
 import android.graphics.Bitmap;
+import android.widget.ImageView;
 
 import com.sandersoft.maximusmovies.models.MovieModel;
 import com.sandersoft.maximusmovies.models.tmdb.Image;
@@ -31,6 +32,6 @@ public interface WebManagerListener {
      * @param image bitmat image
      * @param movie the movie object that will receive the image
      */
-    public void onReceiveHttpTMDBImage(Bitmap image, MovieModel movie);
+    public void onReceiveHttpTMDBImage(Bitmap image, MovieModel movie, ImageView imageHolder);
 
 }

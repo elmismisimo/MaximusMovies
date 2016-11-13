@@ -4,4 +4,6 @@
 
     <string name="search_title">Search</string>
     <string name="search_hint">Movie title/description</string>
+
+    <string name="trailer">Trailer</string>
 </resources>

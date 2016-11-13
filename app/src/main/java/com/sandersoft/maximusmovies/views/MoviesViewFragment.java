@@ -19,6 +19,8 @@ import com.sandersoft.maximusmovies.ApplicationMain;
 import com.sandersoft.maximusmovies.R;
 import com.sandersoft.maximusmovies.controlers.MoviesController;
 import com.sandersoft.maximusmovies.models.MovieModel;
+import com.sandersoft.maximusmovies.utils.Globals;
+
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class MoviesViewFragment extends Fragment {
         lst_movies = (RecyclerView) rootview.findViewById(R.id.lst_movies);
 
         if (savedInstanceState != null){
-            movieController = savedInstanceState.getParcelable("moviecontroller");
+            movieController = savedInstanceState.getParcelable(Globals.MOVIE_CONTROLLER_TAG);
             movieController.setMovieView(this);
             setAsWebListener();
             //ArrayList<MovieModel> movies = savedInstanceState.getParcelableArrayList("movies");
@@ -68,7 +70,7 @@ public class MoviesViewFragment extends Fragment {
             @Override
             public void onScrollChanged() {
                 //verify if the list reached the end and load new elements automatically
-                if (layoutManager.findLastCompletelyVisibleItemPosition() == movieController.getMovies().size()-1) {
+                if (layoutManager.findLastCompletelyVisibleItemPosition() == movieController.getMovies().size()-2) {
                     //remove the scroll listener from the list while is loading
                     lst_movies.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
                     //request the next set of the movies
@@ -89,7 +91,7 @@ public class MoviesViewFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //get objects backedup so we can reload the activity with the same infromation
-        outState.putParcelable("moviecontroller", movieController);
+        outState.putParcelable(Globals.MOVIE_CONTROLLER_TAG, movieController);
     }
 
     /**

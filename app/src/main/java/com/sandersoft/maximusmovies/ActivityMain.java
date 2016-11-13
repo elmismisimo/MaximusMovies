@@ -3,21 +3,16 @@ package com.sandersoft.maximusmovies;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
-import android.graphics.Movie;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.sandersoft.maximusmovies.models.MovieModel;
+import com.sandersoft.maximusmovies.utils.Globals;
 import com.sandersoft.maximusmovies.views.MoviesViewFragment;
-
-import java.util.ArrayList;
 
 public class ActivityMain extends AppCompatActivity {
 
@@ -25,29 +20,28 @@ public class ActivityMain extends AppCompatActivity {
     String searchPreval = "";
 
     MoviesViewFragment mainFragment;
-    private static final String TAG_MOVIE_FRAGMENT = "movieListFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_base);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //place the fragment in the container
         if (savedInstanceState == null) {
+            //place the fragment in the container
             mainFragment = new MoviesViewFragment();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.main_fragment, mainFragment, TAG_MOVIE_FRAGMENT);
+            ft.replace(R.id.main_fragment, mainFragment, Globals.TAG_MOVIE_FRAGMENT);
             //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             //ft.addToBackStack(null);
             ft.commit();
         } else {
+            //recover the values after a destroy
             searchPreval = savedInstanceState.getString("search");
-            mainFragment = (MoviesViewFragment) getFragmentManager().findFragmentByTag(TAG_MOVIE_FRAGMENT);
-            //set the information from previews destroy so we can show it correctly
-            //mainFragment.movieController.setMovies(savedInstanceState.getParcelableArrayList("movies"));
+            mainFragment = (MoviesViewFragment) getFragmentManager().findFragmentByTag(Globals.TAG_MOVIE_FRAGMENT);
         }
+        //we define the controller of the fragment as the web listener for all the incoming requests
         mainFragment.setAsWebListener();
 
         //if is first load, request the movies
@@ -59,6 +53,8 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        //we place the last search term in the outState variable so when the rotation happens
+        //the search value is preserved
         outState.putString("search", searchPreval);
     }
 
@@ -78,12 +74,18 @@ public class ActivityMain extends AppCompatActivity {
         //searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
     }
-    public void defineSearchView(final Menu menu){
 
-        // Associate searchable configuration with the SearchView
+    /**
+     * The searchview is defined in this section
+     * @param menu the menu where the searchview is gona be placed
+     */
+    public void defineSearchView(final Menu menu){
+        // instanciate the searchview and add the search configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) searchItem.getActionView();
         if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             searchView.setIconifiedByDefault(false);
             //searchView.setFocusable(true);
             //searchView.setIconified(false);
@@ -104,7 +106,7 @@ public class ActivityMain extends AppCompatActivity {
                     return false;
                 }
             });
-            //verificamos una consulta previa
+            //verify if there is a previous search, and add it to the searchview (without triggering search)
             if (!searchPreval.isEmpty()){
                 searchItem.expandActionView();
                 searchView.setQuery(searchPreval, false);
@@ -113,7 +115,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -127,5 +129,5 @@ public class ActivityMain extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 }

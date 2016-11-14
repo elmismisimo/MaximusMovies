@@ -102,6 +102,9 @@ public class MoviesController implements WebManagerListener, Parcelable {
     public boolean canLoadMore(){
         return movies.size() < movieMaxCount;
     }
+    public boolean isSearchEmpty(){
+        return movieMaxCount <= 0;
+    }
 
     /**
      * Do a movies request for first time (from page one),and return 10 pages
@@ -158,11 +161,19 @@ public class MoviesController implements WebManagerListener, Parcelable {
         //verify if there is a loading element
         while (this.movies.contains(null))
             this.movies.remove(null);
-        //clear the element from the list that will be replaced with this request
-        if (this.movies.size() > page)
-            this.movies.subList(page, this.movies.size()).clear();
-        //add all the elements from the list
-        this.movies.addAll(Arrays.asList(movies));
+        //verify if there are any results at all
+        if (cant > 0) {
+            //clear the element from the list that will be replaced with this request
+            if (this.movies.size() > page)
+                this.movies.subList(page, this.movies.size()).clear();
+            //add all the elements from the list
+            this.movies.addAll(Arrays.asList(movies));
+        } else {
+            //clear all the movies
+            this.movies.clear();
+            //add dummy movie to be considered as a text saying that there where no matches
+            this.movies.add(new MovieModel());
+        }
         //notify the view that the movie list changed
         movieView.receiveMovies();
     }

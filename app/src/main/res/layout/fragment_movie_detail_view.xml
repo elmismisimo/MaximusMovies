@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:src="@mipmap/ic_launcher"
+        android:src="@mipmap/thumbnail"
         android:scaleType="fitStart"
         />
 
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@color/colorAppBackground"
-                android:gravity="start|top"
+                android:gravity="center_horizontal|top"
                 android:padding="5dp">
 
                 <TextView
@@ -59,6 +59,7 @@
                     android:textSize="28sp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_gravity="start"
                     />
 
                 <TextView
@@ -117,7 +118,8 @@
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/lst_images"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:layout_height="200dp"
                     android:layout_marginTop="20dp"></android.support.v7.widget.RecyclerView>
 

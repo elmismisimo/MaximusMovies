@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.sandersoft.maximusmovies.ApplicationMain;
+import com.sandersoft.maximusmovies.R;
 import com.sandersoft.maximusmovies.interfaces.WebManagerListener;
 import com.sandersoft.maximusmovies.models.MovieModel;
 import com.sandersoft.maximusmovies.models.tmdb.Image;
@@ -104,11 +105,10 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
     @Override
     public void onReceiveHttpAnswerError(String error) {
         Log.e("MovieController", error);
-        //verify if there is a loading element
-        /*while (this.movies.contains(null))
-            this.movies.remove(null);*/
-        //notify the view that the movie list changed
-        //movieView.receiveMovies();
+        //set an empty overview for the loading icon to disapear
+        movie.setOverview(movieDetailView.getResources().getString(R.string.no_overview));
+        //update the ui with new information
+        movieDetailView.drawElements();
     }
     //receive the images from TMDB
     @Override
@@ -127,8 +127,12 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
         //verify if an imageholder was provided
         if (null != imageHolder) {//its the poster
             moviePosterBig = image;
+            //place the image in hte big poster
             imageHolder.setImageBitmap(moviePosterBig);
+            //ad the poster to the backdrops
             backdrops.add(0,image);
+            //tell the recyclerview that the images are updated
+            movieDetailView.drawImages();
         } else { //is a backdrop
             if (trailerPreview == null) { //we place the first backdrop to the trailer section
                 trailerPreview = image;
@@ -137,7 +141,7 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
             } else {
                 //add the image to the list
                 backdrops.add(image);
-                //tell the view that the images are updated
+                //tell the recyclerview that the images are updated
                 movieDetailView.drawImages();
             }
         }

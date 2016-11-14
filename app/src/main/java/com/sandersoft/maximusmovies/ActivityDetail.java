@@ -25,16 +25,21 @@ public class ActivityDetail extends AppCompatActivity {
             Bundle extras = getIntent().getExtras();
             MovieModel movie = extras.getParcelable(Globals.MOVIE_OBJ_TAG);
 
+            //instantiate the detailFragment
             detailFragment = new MovieDetailViewFragment();
+            //pass the movie to the fragment controller
             detailFragment.setMovieObject(movie);
+            //place the fragment in its framelayout
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.detail_fragment, detailFragment, Globals.TAG_MOVIE_DETAIL_FRAGMENT);
             //ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             //ft.addToBackStack(null);
             ft.commit();
         } else {
+            //recover the fragment from the fragment manager
             detailFragment = (MovieDetailViewFragment) getFragmentManager().findFragmentByTag(Globals.TAG_MOVIE_DETAIL_FRAGMENT);
         }
+        //set the fragment controller as the weblistener of the webmanager
         detailFragment.setAsWebListener();
     }
 
@@ -50,4 +55,10 @@ public class ActivityDetail extends AppCompatActivity {
         detailFragment.setAsWebListener();
     }
 
+    @Override
+    public void onBackPressed() {
+        //verify if the fragment handled the back button, if not, then do the custom action
+        if (!detailFragment.onBackPressed())
+            super.onBackPressed();
+    }
 }

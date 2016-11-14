@@ -147,7 +147,7 @@ public class MoviesController implements WebManagerListener, Parcelable {
      * @param size The desired size of the image (w185,w500,original are preferred)
      */
     public void doImageRequest(MovieModel movie, String size){
-        //executes the fetch (the first param ImageView is null because we dont need it, but the funtion requires it)
+        //executes the fetch (the second param ImageView is null because we dont need it, but the funtion requires it)
         ApplicationMain.webManager.doImageRequest(this, null, movie, size);
     }
 

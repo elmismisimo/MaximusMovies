@@ -26,9 +26,12 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
 
     //The movie being detailed
     MovieModel movie;
+    //the big poster to replace the thumbnail
     Bitmap moviePosterBig;
+    //the dropback image that will be used as a trailer image
     Bitmap trailerPreview;
 
+    //list of the backdrop images
     ArrayList<Bitmap> backdrops = new ArrayList<>();
 
     public MovieDetailController(MovieDetailViewFragment caller){
@@ -36,22 +39,46 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
         //add a null object to backdrops so it is interpreted as a loading element of the list
         backdrops.add(null);
     }
+    /**
+     * Set the view related to this controller
+     * @param caller
+     */
     public void setMovieDetailView(MovieDetailViewFragment caller){
         movieDetailView = caller;
     }
+    /**
+     * Set the movie object for the activity
+     * @param movie
+     */
     public void setMovieObject(MovieModel movie){
         this.movie = movie;
     }
 
+    /**
+     * Get the movie object
+     * @return
+     */
     public MovieModel getMovie(){
         return movie;
     }
+    /**
+     * get the big poster of the movie (big resolution)
+     * @return
+     */
     public Bitmap getMoviePoster(){
         return moviePosterBig;
     }
+    /**
+     * get the image that is being used as trailer preview
+     * @return
+     */
     public Bitmap getMovieTrailerImage(){
         return trailerPreview;
     }
+    /**
+     * Get the list of backdrop images
+     * @return
+     */
     public ArrayList<Bitmap> getBackdrops(){
         return backdrops;
     }
@@ -64,41 +91,64 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
         ApplicationMain.webManager.setWebManagerListener(this);
     }
 
+    /**
+     * Do the initial movie request (full movie info, images for the gallery)
+     */
     public void doInitialMovieRequest(){
         //request the full info of the movie
         ApplicationMain.webManager.doMovieRequest(this, movie.getIds().getTrakt() + "?extended=full");
         //verify the images of the movie
         if (null == movie.getImages()){//if the images has not been loaded yet (came to early to this activity)
-            //request the images
+            //request the list of images url
             doImagesListRequest();
         } else {
+            //request the bitmap images
             doImagesRequest();
         }
     }
+    /**
+     * request the list of images url from TMDB
+     */
     public void doImagesListRequest(){
         ApplicationMain.webManager.doImagesRequest(this, movie.getIds().getTmdb().toString(), movie);
     }
+    /**
+     * Request the Poster Bitmap and the backdropd bitmaps
+     */
     public void doImagesRequest(){
         //request the poster in better quality
         doImageRequest(movieDetailView.img_poster);
         //request the backdrops for the reciclerview
         for (Image iurl : movie.getImages().getBackdrops())
+            //request the image without a imageholder, so we know it is one of the backdrop images
             doImageRequest(null, iurl.getFile_path());
     }
+    /**
+     * Request an image bitmap from TMDB (the image url will be obtained automatically from the
+     * movie object of the controller)
+     * @param imageHolder the imageview container of the image
+     */
     public void doImageRequest(ImageView imageHolder){
-        //executes the fetch (the first param ImageView is null because we dont need it, but the funtion requires it)
+        //executes the fetch of the image
         ApplicationMain.webManager.doImageRequest(this, imageHolder, movie, "w500");
     }
+    /**
+     * Request an image bitmap from TMDB using a url
+     * @param imageHolder the imageview container of the image
+     * @param image_url the url of the images
+     */
     public void doImageRequest(ImageView imageHolder, String image_url){
-        //executes the fetch (the first param ImageView is null because we dont need it, but the funtion requires it)
+        //executes the fetch of the image
         ApplicationMain.webManager.doImageRequest(this, imageHolder, image_url, "w500");
     }
 
     //receive the movies result
     @Override
     public void onReceiveHttpAnswer(MovieModel[] movies, int cant, int page, String search) {
+        //get the needed overview and trailer values (the other are ignored in this version)
         movie.setOverview(movies[0].getOverview());
         movie.setTrailer(movies[0].getTrailer());
+        //notify the view that we have new information to be drawn
         movieDetailView.drawElements();
     }
     //receive an error of the movie fetch
@@ -115,7 +165,7 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
     public void onReceiveHttpTMDB(Images images, MovieModel movie) {
         //set the images on the movie
         this.movie.setImages(images);
-        //go find the poster and backdrops
+        //go find the poster and backdrops wit this list
         doImagesRequest();
     }
     //receive bitmap image from TMDB

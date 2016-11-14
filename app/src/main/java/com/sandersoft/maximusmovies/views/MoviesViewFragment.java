@@ -72,7 +72,7 @@ public class MoviesViewFragment extends Fragment {
             @Override
             public void onScrollChanged() {
                 //verify if the list reached the end and load new elements automatically
-                if (layoutManager.findLastCompletelyVisibleItemPosition() == movieController.getMovies().size()-2) {
+                if (layoutManager.findLastCompletelyVisibleItemPosition() >= movieController.getMovies().size()-2) {
                     //remove the scroll listener from the list while is loading
                     lst_movies.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
                     //request the next set of the movies

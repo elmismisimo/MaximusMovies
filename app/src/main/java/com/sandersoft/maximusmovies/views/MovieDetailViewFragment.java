@@ -1,6 +1,7 @@
 package com.sandersoft.maximusmovies.views;
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,10 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sandersoft.maximusmovies.R;
 import com.sandersoft.maximusmovies.controlers.MovieDetailController;
@@ -27,6 +28,7 @@ public class MovieDetailViewFragment extends Fragment {
 
     //controller that handle action with the movies
     MovieDetailController movieController;
+    GalleryViewFragment galleryFragment;
 
     //vistas de la actividad
     public ImageView img_poster;
@@ -38,8 +40,13 @@ public class MovieDetailViewFragment extends Fragment {
     ImageView img_video;
     ImageView img_play;
     RecyclerView lst_images;
+    FrameLayout gallery_fragment;
 
+    //adapter of the image slider at the bottom
     ImagessAdapter imagesAdapter;
+
+    //flag to check if the gallery fragment is open
+    boolean onGallery = false;
 
     public MovieDetailViewFragment() {
         movieController = new MovieDetailController(this);
@@ -60,16 +67,29 @@ public class MovieDetailViewFragment extends Fragment {
         img_video = (ImageView) rootview.findViewById(R.id.img_video);
         img_play = (ImageView) rootview.findViewById(R.id.img_play);
         lst_images = (RecyclerView) rootview.findViewById(R.id.lst_images);
+        gallery_fragment = (FrameLayout) rootview.findViewById(R.id.gallery_fragment);
 
+        //if we are coming back from a destroyed action (a rotation perhaps)
         if (savedInstanceState != null){
+            //get the controller and the gallery flag
             movieController = savedInstanceState.getParcelable(Globals.MOVIE_CONTROLLER_TAG);
+            onGallery = savedInstanceState.getBoolean(Globals.ON_GALLERY);
+            //set this view as the view of the controller
             movieController.setMovieDetailView(this);
+            //set the controller as the current weblistener
             setAsWebListener();
+
+            //get the gallery fragment from the fragment manager
+            galleryFragment = (GalleryViewFragment) getFragmentManager().findFragmentByTag(Globals.TAG_GALLERY_FRAGMENT);
+            //the activity was destroyed, if the gallery was opened, we need to open it again
+            if (onGallery) gallery_fragment.setVisibility(View.VISIBLE);
         }
 
+        //set the listener of the trailer to open it (its a url, we let android manage the app
         img_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //verify if the trailer is not null
                 if (null != movieController.getMovie().getTrailer()){
                     Intent trailerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(movieController.getMovie().getTrailer()));
                     startActivity(trailerIntent);
@@ -102,6 +122,23 @@ public class MovieDetailViewFragment extends Fragment {
         super.onSaveInstanceState(outState);
         //get objects backedup so we can reload the activity with the same infromation
         outState.putParcelable(Globals.MOVIE_CONTROLLER_TAG, movieController);
+        outState.putBoolean(Globals.ON_GALLERY, onGallery);
+    }
+
+    /**
+     * Handle the back button pression
+     * @return true if the action was handled, false to let android handle it
+     */
+    public boolean onBackPressed(){
+        //if we are viewing the gallery, we close it
+        if (onGallery) {
+            gallery_fragment.setVisibility(View.GONE);
+            onGallery = false;
+            //return true saying that we handle the action
+            return true;
+        }
+        //return false letting android handle the action
+        return false;
     }
 
     /**
@@ -111,33 +148,67 @@ public class MovieDetailViewFragment extends Fragment {
         movieController.setAsWebListener();
     }
 
+    /**
+     * Place the information of the movie in the correct element
+     */
     public void drawElements(){
+        //place title and year
         txt_title.setText(movieController.getMovie().getTitle());
         txt_year.setText(String.valueOf(movieController.getMovie().getYear()));
-        //place the overview
+        //place the overview (if it has already arrived from the request)
         if (null != movieController.getMovie().getOverview()){
+            //close the loading element
             lay_loading.setVisibility(View.GONE);
+            //put the overview in the textview and open it
             txt_overview.setText(movieController.getMovie().getOverview());
             txt_overview.setVisibility(View.VISIBLE);
         }
-        //place the poster
+        //place the poster big poster, if there is still no big poster, place the small one
         if (null != movieController.getMoviePoster())
             img_poster.setImageBitmap(movieController.getMoviePoster());
         else if (null != movieController.getMovie().getPoster())
             img_poster.setImageBitmap(movieController.getMovie().getPoster());
-        //place the trailer
+        //place the trailer image (its just a backdrop)
         if (null != movieController.getMovieTrailerImage())
             img_video.setImageBitmap(movieController.getMovieTrailerImage());
+        //open the trailer layout, if the trailer info has arrived
         if (null != movieController.getMovie().getTrailer())
             lay_trailer.setVisibility(View.VISIBLE);
     }
+
+    /**
+     * Notify the adapter ther are images to be shown
+     */
     public void drawImages(){
         imagesAdapter.notifyData();
     }
 
+    /**
+     * Do the infital request of the info of the movie (full movie info, big poster, backdrop images)
+     */
     public void doInitialMovieRequest(){
         //request the full info of the movie
         movieController.doInitialMovieRequest();
+    }
+
+    /**
+     * When an image is clicked, the gallery must open in that selected image
+     * @param position the postion of the selected image
+     */
+    public void elementClicked(int position){
+        //define the gallery fragment
+        galleryFragment = new GalleryViewFragment();
+        //set the initial values of the gallery
+        galleryFragment.setInitialValues(movieController.getBackdrops(), position);
+        //place the fragment in the gallery_fragment
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.gallery_fragment, galleryFragment, Globals.TAG_GALLERY_FRAGMENT);
+        ft.commit();
+
+        //define tha gallery as opened
+        onGallery = true;
+        //open the galery framleyout
+        gallery_fragment.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -197,8 +268,8 @@ public class MovieDetailViewFragment extends Fragment {
                 ih.img_dropback.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(getActivity(), "hola", Toast.LENGTH_SHORT).show();
-                        //elementClicked(position);
+                        //Toast.makeText(getActivity(), "hola", Toast.LENGTH_SHORT).show();
+                        elementClicked(position);
                     }
                 });
             } else if (holder instanceof LoadingViewHolder){

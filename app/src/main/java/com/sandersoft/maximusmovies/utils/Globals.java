@@ -19,6 +19,14 @@ public class Globals {
     //TAGS
     public static final String TAG_MOVIE_FRAGMENT = "movieDetailFragment";
     public static final String TAG_MOVIE_DETAIL_FRAGMENT = "movieDetailFragment";
+    public static final String TAG_GALLERY_FRAGMENT = "galleryFragment";
     public static final String MOVIE_CONTROLLER_TAG = "movieController";
     public static final String MOVIE_OBJ_TAG = "movieObject";
+
+    //constant for the gallery
+    public static final String ON_GALLERY = "onGallery";
+    public static final String GALLERY_POS = "pos";
+    public static final int SWIPE_MIN_DISTANCE = 120;
+    public static final int SWIPE_THRESHOLD_VELOCITY = 100;
+
 }

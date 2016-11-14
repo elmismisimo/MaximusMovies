@@ -3,6 +3,7 @@
 
     <string name="search_title">Cerca</string>
     <string name="no_match">No s\'han trobat pel·lícules que feia joc amb la recerca</string>
+    <string name="no_internet">No està connectat a Internet</string>
     <string name="search_hint">Títol/descripció de la Pel·lícula</string>
     <string name="no_overview">Descripció general no es troba</string>
 

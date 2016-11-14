@@ -40,6 +40,9 @@ public class MoviesController implements WebManagerListener, Parcelable {
     public void setMovieView(MoviesViewFragment caller){
         movieView = caller;
     }
+    public void setSearch(String search){
+        this.search = search; //define the latest search term
+    }
 
     /**
      * Define thsi controller as the listener of the webmanager (the web manager will report to
@@ -91,9 +94,9 @@ public class MoviesController implements WebManagerListener, Parcelable {
      */
     public void findImage(int position){
         //verify if the element at the position is a valid movie element
-        if (position >= movies.size() || movies.get(position).getPoster() != null) return;
+        if (position >= movies.size() || null != movies.get(position).getPoster()) return;
         //if no image urls have been fetched, it requests the images, else it request the image bitmap
-        if (movies.get(position).getImages() == null)
+        if (null == movies.get(position).getImages())
             doImagesRequest(String.valueOf(movies.get(position).getIds().getTmdb()), movies.get(position));
         else
             doImageRequest(movies.get(position));
@@ -108,22 +111,30 @@ public class MoviesController implements WebManagerListener, Parcelable {
 
     /**
      * Do a movies request for first time (from page one),and return 10 pages
-     * @param search The search term (it can be empty)
      */
-    public void doMoviesRequest(String search){
+    public void doMoviesRequest(){
         this.page = 1; //set the page as the initial one
-        this.search = search; //define the latest search term
-        //do the movies request
-        ApplicationMain.webManager.doMoviesRequest(this, "popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
+        //verify if the is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            //do the movies request
+            ApplicationMain.webManager.doMoviesRequest(this, "popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
+        else
+            //send empty result, so it can be interpreted as emptyquery, but with "no connection" text
+            onReceiveHttpAnswer(null, 0, 1, search);
     }
     /**
      * Do a movies request for the next page of the last request
      */
-    public void doMoviesNextPageRequest(){
-        //increment the page by one to get new page
-        page++;
-        //do movies request
-        ApplicationMain.webManager.doMoviesRequest(this, "popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
+    public void doMoviesNextPageRequest() {
+        //verify if the is internet connection
+        if (ApplicationMain.webManager.verifyConn()) {
+            //increment the page by one to get new page
+            page++;
+            //do movies request
+            ApplicationMain.webManager.doMoviesRequest(this, "popular?limit=10&page=" + page + (search.trim().equals("") ? "" : "&query="), search);
+        } else
+            //send empty result, so it can be interpreted as emptyquery, but with "no connection" text
+            onReceiveHttpAnswer(null, 0, 1, search);
     }
     /**
      * Request the set of url of the images from the movie, it fetches them fomr TMDB
@@ -131,15 +142,19 @@ public class MoviesController implements WebManagerListener, Parcelable {
      * @param movie Movie that will receive the images
      */
     public void doImagesRequest(String tmdb_id, MovieModel movie){
-        ApplicationMain.webManager.doImagesRequest(this, tmdb_id, movie);
+        //verify if the is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            ApplicationMain.webManager.doImagesRequest(this, tmdb_id, movie);
     }
     /**
      * Request a bitmap image from TMDB with the lowest setting available (w185)
      * @param movie The movie object that will receive the image
      */
     public void doImageRequest(MovieModel movie) {
-        //sets the request to fetch the w185 image from the server (if available)
-        doImageRequest(movie, "w185");
+        //verify if the is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            //sets the request to fetch the w185 image from the server (if available)
+            doImageRequest(movie, "w185");
     }
     /**
      * Request a bitmap image from TMDB
@@ -147,8 +162,10 @@ public class MoviesController implements WebManagerListener, Parcelable {
      * @param size The desired size of the image (w185,w500,original are preferred)
      */
     public void doImageRequest(MovieModel movie, String size){
-        //executes the fetch (the second param ImageView is null because we dont need it, but the funtion requires it)
-        ApplicationMain.webManager.doImageRequest(this, null, movie, size);
+        //verify if the is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            //executes the fetch (the second param ImageView is null because we dont need it, but the funtion requires it)
+            ApplicationMain.webManager.doImageRequest(this, null, movie, size);
     }
 
     //receive the movies result
@@ -216,12 +233,10 @@ public class MoviesController implements WebManagerListener, Parcelable {
         search = in.readString();
         movies = in.readArrayList(MovieModel.class.getClassLoader());
     }
-
     @Override
     public int describeContents() {
         return 0;
     }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(page);

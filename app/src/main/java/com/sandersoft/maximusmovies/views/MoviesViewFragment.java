@@ -51,7 +51,7 @@ public class MoviesViewFragment extends Fragment {
         View rootview = inflater.inflate(R.layout.fragment_movies_view, container, false);
         lst_movies = (RecyclerView) rootview.findViewById(R.id.lst_movies);
 
-        if (savedInstanceState != null){
+        if (null != savedInstanceState){
             movieController = savedInstanceState.getParcelable(Globals.MOVIE_CONTROLLER_TAG);
             movieController.setMovieView(this);
             setAsWebListener();
@@ -81,10 +81,14 @@ public class MoviesViewFragment extends Fragment {
             }
         };
 
-        if (savedInstanceState != null){
+        //if is first load, request the movies
+        if (null == savedInstanceState) {
+            doMoviesRequest();
+        } else {
             //recreates a call where movies are received, and places again the scrolllistener
             receiveMovies();
         }
+
         //return the view for the activity to be shown
         return rootview;
     }
@@ -149,9 +153,10 @@ public class MoviesViewFragment extends Fragment {
         if (null != lst_movies)
             lst_movies.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
         //notify the adapter to refresh the list
-        if (moviesAdapter != null) moviesAdapter.notifyData();
+        if (null != moviesAdapter) moviesAdapter.notifyData();
         //do the request to the web service
-        movieController.doMoviesRequest(search);
+        movieController.setSearch(search);
+        movieController.doMoviesRequest();
     }
     /**
      * request the next page of the last movies search
@@ -217,9 +222,11 @@ public class MoviesViewFragment extends Fragment {
         }
         public class EmptySearchViewHolder extends RecyclerView.ViewHolder {
             public LinearLayout lay_loading;
+            public TextView txt_message;
 
             public EmptySearchViewHolder(View view) {
                 super(view);
+                txt_message = (TextView) view.findViewById(R.id.txt_message);
             }
         }
 
@@ -227,12 +234,12 @@ public class MoviesViewFragment extends Fragment {
         public int getItemViewType(int position) {
             //use null object as a reference for a loading object in the list (it must be the last on the list)
             if (movieController.getMovies().size()-1 == position &&
-                    movieController.getMovies().get(position) == null)
+                    null == movieController.getMovies().get(position))
                 return VIEW_TYPE_LOADING;
             //if the search returned 0 results, and there is only one dummy movie in the list
             else if (movieController.isSearchEmpty() && movieController.getMovies().size()-1 == position &&
-                    movieController.getMovies().get(position) != null &&
-                    movieController.getMovies().get(position).getTitle() == null)
+                    null != movieController.getMovies().get(position) &&
+                    null == movieController.getMovies().get(position).getTitle())
                 return VIEW_TYPE_EMPTY_SEARCH;
             //the element is a valid movie
             return VIEW_TYPE_ITEM;
@@ -251,7 +258,7 @@ public class MoviesViewFragment extends Fragment {
             } else if (viewType == VIEW_TYPE_EMPTY_SEARCH){
                 View itemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.item_empty_text, parent, false);
-                return new LoadingViewHolder(itemView);
+                return new EmptySearchViewHolder(itemView);
             }
             return null;
         }
@@ -279,7 +286,7 @@ public class MoviesViewFragment extends Fragment {
                     }
                 });
                 //find images (if poster is already in the movie, doesnt fetch it from tmdb, just from the object)
-                if (movieController.getMovies().get(position).getPoster() != null)
+                if (null != movieController.getMovies().get(position).getPoster())
                     mh.img_poster.setImageBitmap(movieController.getMovies().get(position).getPoster());
                 else {
                     //place app image as preview of the poster (just placing something)
@@ -290,7 +297,13 @@ public class MoviesViewFragment extends Fragment {
             } else if (holder instanceof LoadingViewHolder){
                 //do nothing, the loading icon will be shown without trouble
             } else if (holder instanceof EmptySearchViewHolder){
-                //do nothing, the empty search message will be shown without trouble
+                //cast holder as
+                EmptySearchViewHolder eh = (EmptySearchViewHolder) holder;
+                //set the text verifying the connection
+                if (ApplicationMain.webManager.verifyConn())
+                    eh.txt_message.setText(R.string.no_match);
+                else
+                    eh.txt_message.setText(R.string.no_internet);
             }
 
         }

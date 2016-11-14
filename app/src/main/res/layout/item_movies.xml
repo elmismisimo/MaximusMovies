@@ -12,7 +12,7 @@
         android:id="@+id/img_poster"
         android:layout_width="60dp"
         android:layout_height="80dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/thumbnail"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

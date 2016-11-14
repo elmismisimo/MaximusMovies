@@ -191,6 +191,7 @@ public class MoviesViewFragment extends Fragment {
 
         private final int VIEW_TYPE_ITEM = 0;
         private final int VIEW_TYPE_LOADING = 1;
+        private final int VIEW_TYPE_EMPTY_SEARCH = 2;
 
         public class MoviesViewHolder extends RecyclerView.ViewHolder {
             public LinearLayout lay_movie_item;
@@ -214,12 +215,27 @@ public class MoviesViewFragment extends Fragment {
                 lay_loading = (LinearLayout) view.findViewById(R.id.lay_loading);
             }
         }
+        public class EmptySearchViewHolder extends RecyclerView.ViewHolder {
+            public LinearLayout lay_loading;
+
+            public EmptySearchViewHolder(View view) {
+                super(view);
+            }
+        }
 
         @Override
         public int getItemViewType(int position) {
             //use null object as a reference for a loading object in the list (it must be the last on the list)
-            return movieController.getMovies().size()-1 == position &&
-                    movieController.getMovies().get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+            if (movieController.getMovies().size()-1 == position &&
+                    movieController.getMovies().get(position) == null)
+                return VIEW_TYPE_LOADING;
+            //if the search returned 0 results, and there is only one dummy movie in the list
+            else if (movieController.isSearchEmpty() && movieController.getMovies().size()-1 == position &&
+                    movieController.getMovies().get(position) != null &&
+                    movieController.getMovies().get(position).getTitle() == null)
+                return VIEW_TYPE_EMPTY_SEARCH;
+            //the element is a valid movie
+            return VIEW_TYPE_ITEM;
         }
 
         @Override
@@ -231,6 +247,10 @@ public class MoviesViewFragment extends Fragment {
             } else if (viewType == VIEW_TYPE_LOADING){
                 View itemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.item_loading, parent, false);
+                return new LoadingViewHolder(itemView);
+            } else if (viewType == VIEW_TYPE_EMPTY_SEARCH){
+                View itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_empty_text, parent, false);
                 return new LoadingViewHolder(itemView);
             }
             return null;
@@ -263,11 +283,14 @@ public class MoviesViewFragment extends Fragment {
                     mh.img_poster.setImageBitmap(movieController.getMovies().get(position).getPoster());
                 else {
                     //place app image as preview of the poster (just placing something)
-                    mh.img_poster.setImageResource(R.mipmap.ic_launcher);
+                    mh.img_poster.setImageResource(R.mipmap.thumbnail);
                     //go fetch the image from tmdb
                     movieController.findImage(position);
                 }
             } else if (holder instanceof LoadingViewHolder){
+                //do nothing, the loading icon will be shown without trouble
+            } else if (holder instanceof EmptySearchViewHolder){
+                //do nothing, the empty search message will be shown without trouble
             }
 
         }

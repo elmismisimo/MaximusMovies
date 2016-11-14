@@ -260,7 +260,7 @@ public class WebManager {
         @Override
         protected void onPostExecute(Bitmap image) {
             //verify if there is a weblisterner
-            if (currWebListener != null && image != null) {
+            if (currWebListener != null) {
                 //return the bitmap image with the movie object
                 currWebListener.onReceiveHttpTMDBImage(image, movie, imageHolder);
             }

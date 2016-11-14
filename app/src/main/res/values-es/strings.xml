@@ -2,7 +2,7 @@
     <string name="app_name">MaximusMovies</string>
 
     <string name="search_title">Buscar</string>
-    <string name="no_match">No senecontraron resultados con esa busqueda</string>
+    <string name="no_match">No se econtraron resultados con esa búsqueda</string>
     <string name="search_hint">Titulo/descripción de la película</string>
     <string name="no_overview">No se encontró la sinopsis</string>
 

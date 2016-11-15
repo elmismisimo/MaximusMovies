@@ -3,6 +3,7 @@
 
     <string name="search_title">Search</string>
     <string name="no_match">There where 0 movies that matched the search</string>
+    <string name="no_internet">You are not connected to the Internet</string>
     <string name="search_hint">Movie title/description</string>
     <string name="no_overview">Overview info is missing</string>
 

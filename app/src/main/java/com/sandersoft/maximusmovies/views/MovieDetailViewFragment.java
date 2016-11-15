@@ -1,5 +1,6 @@
 package com.sandersoft.maximusmovies.views;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -15,7 +16,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.sandersoft.maximusmovies.ActivityDetail;
 import com.sandersoft.maximusmovies.R;
 import com.sandersoft.maximusmovies.controlers.MovieDetailController;
 import com.sandersoft.maximusmovies.models.MovieModel;
@@ -28,7 +31,10 @@ public class MovieDetailViewFragment extends Fragment {
 
     //controller that handle action with the movies
     MovieDetailController movieController;
+    //fragment of the gallery
     GalleryViewFragment galleryFragment;
+    //The activity holding this fragment
+    Activity parentActivity;
 
     //vistas de la actividad
     public ImageView img_poster;
@@ -51,6 +57,9 @@ public class MovieDetailViewFragment extends Fragment {
     public MovieDetailViewFragment() {
         movieController = new MovieDetailController(this);
     }
+    public void setParentActivity(Activity parentActivity){
+        this.parentActivity = parentActivity;
+    }
     public void setMovieObject(MovieModel movie){
         movieController.setMovieObject(movie);
     }
@@ -70,7 +79,7 @@ public class MovieDetailViewFragment extends Fragment {
         gallery_fragment = (FrameLayout) rootview.findViewById(R.id.gallery_fragment);
 
         //if we are coming back from a destroyed action (a rotation perhaps)
-        if (savedInstanceState != null){
+        if (null != savedInstanceState){
             //get the controller and the gallery flag
             movieController = savedInstanceState.getParcelable(Globals.MOVIE_CONTROLLER_TAG);
             onGallery = savedInstanceState.getBoolean(Globals.ON_GALLERY);
@@ -109,7 +118,7 @@ public class MovieDetailViewFragment extends Fragment {
         drawElements();
 
         //if is first load, request the movies
-        if (savedInstanceState == null) {
+        if (null == savedInstanceState) {
             doInitialMovieRequest();
         }
 
@@ -212,6 +221,16 @@ public class MovieDetailViewFragment extends Fragment {
     }
 
     /**
+     * Fisnish the parent activity of the fragment
+     */
+    public void finishActivity(){
+        if (null != parentActivity){
+            parentActivity.finish();
+            Toast.makeText(getActivity(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
      * Adapter that handles the display of the movies in the list
      */
     public class ImagessAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -240,7 +259,7 @@ public class MovieDetailViewFragment extends Fragment {
         public int getItemViewType(int position) {
             //use null object as a reference for a loading object in the list (it must be the last on the list)
             return movieController.getBackdrops().size()-1 == position &&
-                    movieController.getBackdrops().get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+                    null == movieController.getBackdrops().get(position) ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
         }
 
         @Override

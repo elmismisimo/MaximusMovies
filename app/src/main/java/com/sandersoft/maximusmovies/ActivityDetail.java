@@ -20,13 +20,15 @@ public class ActivityDetail extends AppCompatActivity {
         //setSupportActionBar(toolbar);
 
         //place the fragment in the container
-        if (savedInstanceState == null) {
+        if (null == savedInstanceState) {
             //get the info from the caller activity
             Bundle extras = getIntent().getExtras();
             MovieModel movie = extras.getParcelable(Globals.MOVIE_OBJ_TAG);
 
             //instantiate the detailFragment
             detailFragment = new MovieDetailViewFragment();
+            //define this activity as the parent of the fragment
+            detailFragment.setParentActivity(this);
             //pass the movie to the fragment controller
             detailFragment.setMovieObject(movie);
             //place the fragment in its framelayout

@@ -28,7 +28,7 @@ public class ActivityMain extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if (savedInstanceState == null) {
+        if (null == savedInstanceState) {
             //place the fragment in the container
             mainFragment = new MoviesViewFragment();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -43,11 +43,6 @@ public class ActivityMain extends AppCompatActivity {
         }
         //we define the controller of the fragment as the web listener for all the incoming requests
         mainFragment.setAsWebListener();
-
-        //if is first load, request the movies
-        if (savedInstanceState == null) {
-            mainFragment.doMoviesRequest();
-        }
     }
 
     @Override
@@ -83,7 +78,7 @@ public class ActivityMain extends AppCompatActivity {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) searchItem.getActionView();
-        if (searchView != null) {
+        if (null != searchView) {
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             searchView.setIconifiedByDefault(false);
             //searchView.setFocusable(true);

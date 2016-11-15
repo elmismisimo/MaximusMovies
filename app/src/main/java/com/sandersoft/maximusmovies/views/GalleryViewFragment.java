@@ -135,7 +135,7 @@ public class GalleryViewFragment extends Fragment {
         slideShow.setOnTouchListener(gestureListener);
 
         //if its a recreation of the activity (rotation perhaps)
-        if (savedInstanceState != null){
+        if (null != savedInstanceState){
             //get the controller
             galleryController = savedInstanceState.getParcelable(Globals.MOVIE_CONTROLLER_TAG);
             //get the last position of the gallery

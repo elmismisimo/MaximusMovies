@@ -1,7 +1,10 @@
 package com.sandersoft.maximusmovies;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
@@ -45,6 +48,25 @@ public class WebManager {
     public void setWebManagerListener(WebManagerListener webManagerListener) {
         this.webManagerListener = webManagerListener;
     }
+    public WebManagerListener getwebManagerListener(){
+        return webManagerListener;
+    }
+
+    /**
+     * Verify if there is an internet connection
+     * @return <b>true</b> if there is a connection, <b>false</b> if there isnt
+     */
+    public boolean verifyConn()
+    {
+        //check if the instance of the app is null
+        if (null == ApplicationMain.getContext())return false;
+        //check if there is an internet connection
+        ConnectivityManager cm = (ConnectivityManager) ApplicationMain.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (null != netInfo && netInfo.isConnectedOrConnecting())
+            return true;
+        return false;
+    }
 
     /**
      * Prepare and execute a multiple movie fetch request
@@ -55,7 +77,7 @@ public class WebManager {
         //define the controller as the webListener
         webManagerListener = controller;
         //if there is a ongoing fetch task, cancell it
-        if (getMoviesTask != null){
+        if (null != getMoviesTask){
             getMoviesTask.cancel(true);
             getMoviesTask = null;
         }
@@ -150,7 +172,7 @@ public class WebManager {
         @Override
         protected void onPostExecute(ResponseEntity response) {
             //verify if there is a weblistener and if the response is diferent to null
-            if (currWebListener != null && response != null) {
+            if (null != currWebListener && null != response) {
                 //verify if the request was successfull
                 if (response.getStatusCode().equals(HttpStatus.OK)) {
                     //verify if its aa multiple fetch
@@ -211,7 +233,7 @@ public class WebManager {
         @Override
         protected void onPostExecute(Images response) {
             //verify if there is a weblistener registered
-            if (currWebListener != null) {
+            if (null != currWebListener) {
                 //return the image list with the movie object
                 currWebListener.onReceiveHttpTMDB(response, movie);
             }
@@ -248,7 +270,7 @@ public class WebManager {
                 //do the request
                 ResponseEntity<Resource> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Resource.class);
                 //convert the response to bitmap
-                if (response.getBody() != null)
+                if (null != response.getBody())
                     return BitmapFactory.decodeStream(response.getBody().getInputStream());
             } catch (Exception e) {
                 Log.e("WebRequest", e.getMessage(), e);
@@ -260,7 +282,7 @@ public class WebManager {
         @Override
         protected void onPostExecute(Bitmap image) {
             //verify if there is a weblisterner
-            if (currWebListener != null) {
+            if (null != currWebListener) {
                 //return the bitmap image with the movie object
                 currWebListener.onReceiveHttpTMDBImage(image, movie, imageHolder);
             }

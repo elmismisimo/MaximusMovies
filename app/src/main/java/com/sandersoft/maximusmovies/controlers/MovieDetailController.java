@@ -95,33 +95,43 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
      * Do the initial movie request (full movie info, images for the gallery)
      */
     public void doInitialMovieRequest(){
-        //request the full info of the movie
-        ApplicationMain.webManager.doMovieRequest(this, movie.getIds().getTrakt() + "?extended=full");
-        //verify the images of the movie
-        if (null == movie.getImages()){//if the images has not been loaded yet (came to early to this activity)
-            //request the list of images url
-            doImagesListRequest();
-        } else {
-            //request the bitmap images
-            doImagesRequest();
-        }
+        //verify if there is internet connection
+        if (ApplicationMain.webManager.verifyConn()) {
+            //request the full info of the movie
+            ApplicationMain.webManager.doMovieRequest(this, movie.getIds().getTrakt() + "?extended=full");
+            //verify the images of the movie
+            if (null == movie.getImages()) {//if the images has not been loaded yet (came to early to this activity)
+                //request the list of images url
+                doImagesListRequest();
+            } else {
+                //request the bitmap images
+                doImagesRequest();
+            }
+        } else
+            //kill the activity
+            movieDetailView.finishActivity();
     }
     /**
      * request the list of images url from TMDB
      */
     public void doImagesListRequest(){
-        ApplicationMain.webManager.doImagesRequest(this, movie.getIds().getTmdb().toString(), movie);
+        //verify if there is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            ApplicationMain.webManager.doImagesRequest(this, movie.getIds().getTmdb().toString(), movie);
     }
     /**
      * Request the Poster Bitmap and the backdropd bitmaps
      */
     public void doImagesRequest(){
-        //request the poster in better quality
-        doImageRequest(movieDetailView.img_poster);
-        //request the backdrops for the reciclerview
-        for (Image iurl : movie.getImages().getBackdrops())
-            //request the image without a imageholder, so we know it is one of the backdrop images
-            doImageRequest(null, iurl.getFile_path());
+        //verify if there is internet connection
+        if (ApplicationMain.webManager.verifyConn()) {
+            //request the poster in better quality
+            doImageRequest(movieDetailView.img_poster);
+            //request the backdrops for the reciclerview
+            for (Image iurl : movie.getImages().getBackdrops())
+                //request the image without a imageholder, so we know it is one of the backdrop images
+                doImageRequest(null, iurl.getFile_path());
+        }
     }
     /**
      * Request an image bitmap from TMDB (the image url will be obtained automatically from the
@@ -129,8 +139,10 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
      * @param imageHolder the imageview container of the image
      */
     public void doImageRequest(ImageView imageHolder){
-        //executes the fetch of the image
-        ApplicationMain.webManager.doImageRequest(this, imageHolder, movie, "w500");
+        //verify if there is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            //executes the fetch of the image
+            ApplicationMain.webManager.doImageRequest(this, imageHolder, movie, "w500");
     }
     /**
      * Request an image bitmap from TMDB using a url
@@ -138,8 +150,10 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
      * @param image_url the url of the images
      */
     public void doImageRequest(ImageView imageHolder, String image_url){
-        //executes the fetch of the image
-        ApplicationMain.webManager.doImageRequest(this, imageHolder, image_url, "w500");
+        //verify if there is internet connection
+        if (ApplicationMain.webManager.verifyConn())
+            //executes the fetch of the image
+            ApplicationMain.webManager.doImageRequest(this, imageHolder, image_url, "w500");
     }
 
     //receive the movies result
@@ -184,7 +198,7 @@ public class MovieDetailController implements WebManagerListener, Parcelable {
             //tell the recyclerview that the images are updated
             movieDetailView.drawImages();
         } else { //is a backdrop
-            if (trailerPreview == null) { //we place the first backdrop to the trailer section
+            if (null == trailerPreview) { //we place the first backdrop to the trailer section
                 trailerPreview = image;
                 //we place the trailer image
                 movieDetailView.drawElements();

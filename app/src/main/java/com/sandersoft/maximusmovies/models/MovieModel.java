@@ -213,7 +213,7 @@ public class MovieModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(title);
-        dest.writeInt(year);
+        dest.writeInt(year != null ? year : 0);
         dest.writeParcelable(ids, flags);
         dest.writeString(overview);
         dest.writeString(trailer);

@@ -82,7 +82,7 @@ public class WebManager {
             getMoviesTask = null;
         }
         //create a new fetch task
-        getMoviesTask = new GetMoviesTask();
+        getMoviesTask = getTheMoviesTask();
         //execute the task
         getMoviesTask.execute(params,search);
     }
@@ -127,37 +127,44 @@ public class WebManager {
         new GetImageTask(imageHolder, null).execute(image_url, size);
     }
 
+    public GetMoviesTask getTheMoviesTask(){
+        return new GetMoviesTask();
+    }
+    public GetImagesTask getTheImagesTask(MovieModel movie){
+        return new GetImagesTask(movie);
+    }
+    public GetImageTask getTheImageTask(ImageView imageHolder, MovieModel movie){
+        return new GetImageTask(imageHolder, movie);
+    }
+
     /**
      * AsyncTask that fetches the movies
      */
-    private class GetMoviesTask extends AsyncTask<String, Void, ResponseEntity> {
+    public class GetMoviesTask extends AsyncTask<String, Void, ResponseEntity> {
         String search="";
         boolean multiple = false;
         //instantiate the current listener, so the old responses never goes to newlly registered controllers
         WebManagerListener currWebListener = webManagerListener;
+
+        public void defineMultiple(boolean m){
+            multiple = m;
+        }
+        public void defineSearch(String search){
+            this.search = search;
+        }
 
         @Override
         protected ResponseEntity doInBackground(String... params) {
             try {
                 //verify if the request has a search term (this defines if is a multiple fetch)
                 if (params.length > 1) {
-                    search = params[1];
-                    multiple = true;
+                    defineSearch(params[1]);
+                    defineMultiple(true);
                 }
                 //create the url
                 String url = Globals.MOVIES_URL + params[0] + search;
-                //define the spring request
-                RestTemplate restTemplate = new RestTemplate();
-                //define the headers
-                HttpHeaders requestHeaders = new HttpHeaders();
-                requestHeaders.add("Content-Type", "application/json");
-                requestHeaders.add("trakt-api-version", "2");
-                requestHeaders.add("trakt-api-key", Globals.TRAKT_ID);
-                HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
-                //we add the converter
-                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                //do the request (depending if its multiple or not, the receiving class changes)
-                ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, multiple ? MovieModel[].class : MovieModel.class);
+                //do the request proccess
+                ResponseEntity response = getMoviesProcess(url, multiple);
                 return response;
             } catch (HttpClientErrorException e){
                 //return the error response
@@ -170,7 +177,7 @@ public class WebManager {
         }
 
         @Override
-        protected void onPostExecute(ResponseEntity response) {
+        public void onPostExecute(ResponseEntity response) {
             //verify if there is a weblistener and if the response is diferent to null
             if (null != currWebListener && null != response) {
                 //verify if the request was successfull
@@ -198,11 +205,31 @@ public class WebManager {
             }
         }
     }
+    /**
+     * The process that does the fetch of the movies from Trakt.tv
+     * @param url The url to fetch
+     * @return
+     */
+    public ResponseEntity getMoviesProcess(String url, boolean multiple) throws HttpClientErrorException {
+        //define the spring request
+        RestTemplate restTemplate = new RestTemplate();
+        //define the headers
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-Type", "application/json");
+        requestHeaders.add("trakt-api-version", "2");
+        requestHeaders.add("trakt-api-key", Globals.TRAKT_ID);
+        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
+        //we add the converter
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        //do the request (depending if its multiple or not, the receiving class changes)
+        ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, multiple ? MovieModel[].class : MovieModel.class);
+        return response;
+    }
 
     /**
      * AsyncTask that fetches the list ulr_images
      */
-    private class GetImagesTask extends AsyncTask<String, Void, Images> {
+    public class GetImagesTask extends AsyncTask<String, Void, Images> {
         MovieModel movie;
         //instantiate the current listener, so the old responses never goes to newlly registered controllers
         WebManagerListener currWebListener = webManagerListener;
@@ -216,12 +243,8 @@ public class WebManager {
             try {
                 //generate the url
                 final String url = Globals.TMSB_IMAGES_URL.replace("***", params[0]) + Globals.TMDB_ID;
-                //define the spring request
-                RestTemplate restTemplate = new RestTemplate();
-                //we add the converter
-                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 //do the request
-                Images response = restTemplate.getForObject(url, Images.class);
+                Images response = getImagesProcess(url);
                 return response;
             } catch (Exception e) {
                 Log.e("WebRequest", e.getMessage(), e);
@@ -239,11 +262,25 @@ public class WebManager {
             }
         }
     }
+    /**
+     * Process that does the fetch of the list of images urls from TMDB
+     * @param url the url of the images service
+     * @return list of image urls from TMDB
+     */
+    public Images getImagesProcess(String url){
+        //define the spring request
+        RestTemplate restTemplate = new RestTemplate();
+        //we add the converter
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        //do the request
+        Images response = restTemplate.getForObject(url, Images.class);
+        return response;
+    }
 
     /**
      * AsyncTask that fetches a bitmap image from the web
      */
-    private class GetImageTask extends AsyncTask<String, Void, Bitmap> {
+    public class GetImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView imageHolder;
         MovieModel movie;
         //instantiate the current listener, so the old responses never goes to newlly registered controllers
@@ -259,16 +296,8 @@ public class WebManager {
             try {
                 //generate the url
                 final String url = Globals.TMSB_IMAGE_URL.replace("***", params[1]) + params[0];
-                //define the spring request
-                RestTemplate restTemplate = new RestTemplate();
-                restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-                restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-                restTemplate.getMessageConverters().add(new ResourceHttpMessageConverter());
-                //define the headders
-                HttpHeaders requestHeaders = new HttpHeaders();
-                HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
-                //do the request
-                ResponseEntity<Resource> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Resource.class);
+                //do the request process
+                ResponseEntity<Resource> response = getImageProcess(url);
                 //convert the response to bitmap
                 if (null != response.getBody())
                     return BitmapFactory.decodeStream(response.getBody().getInputStream());
@@ -281,11 +310,29 @@ public class WebManager {
 
         @Override
         protected void onPostExecute(Bitmap image) {
-            //verify if there is a weblisterner
+            //verify if there is a weblistener
             if (null != currWebListener) {
                 //return the bitmap image with the movie object
                 currWebListener.onReceiveHttpTMDBImage(image, movie, imageHolder);
             }
         }
+    }
+    /**
+     * Process that fetches an image bitmap from TMDB
+     * @param url the url of the image
+     * @return ResponseEntity with the type Resource, and the image must be in the body
+     */
+    public ResponseEntity<Resource> getImageProcess(String url){
+        //define the spring request
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        restTemplate.getMessageConverters().add(new ResourceHttpMessageConverter());
+        //define the headders
+        HttpHeaders requestHeaders = new HttpHeaders();
+        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
+        //do the request
+        ResponseEntity<Resource> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Resource.class);
+        return response;
     }
 }

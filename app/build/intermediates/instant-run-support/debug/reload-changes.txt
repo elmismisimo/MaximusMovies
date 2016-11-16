@@ -1,0 +1,5 @@
+CHANGED,C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\android\tools\fd\runtime\AppPatchesLoaderImpl.class
+CHANGED,C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\sandersoft\maximusmovies\WebManager$override.class
+CHANGED,C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\sandersoft\maximusmovies\WebManager$GetMoviesTask$override.class
+CHANGED,C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\sandersoft\maximusmovies\WebManager$GetImagesTask$override.class
+CHANGED,C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\sandersoft\maximusmovies\WebManager$GetImageTask$override.class

@@ -1,3 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
 
+    <item
+        jar="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.2.1\jars\libs\internal_impl-23.2.1.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="607a3d0b8013b4ccbfeb0b7cb293351994e021fb">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\internal_impl-23.2.1_b191a9b99f2afd95fac746ca8a8fbdd245c8eaa2.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\design\23.0.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="e5c61a3169221a89654ffcaaed47bba51cf071ad">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\com.android.support-design-23.0.1_52cb9375e48ea8ec0e731244588aa554c9872561.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="3be474b1b21b31cf2fa93fe6bd641ae108d96452">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\com.android.support-support-v4-23.2.1_790ceb5104aed19e524db9d7202d7a74d01873c1.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.core\jackson-annotations\2.3.0\f5e853a20b60758922453d56f9ae1e64af5cb3da\jackson-annotations-2.3.0.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="f5e853a20b60758922453d56f9ae1e64af5cb3da">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\jackson-annotations-2.3.0_9eafaa047547c71b2b3ccf41cab411e075216e63.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\org.reactivestreams\reactive-streams\1.0.0\14b8c877d98005ba3941c9257cfe09f6ed0e0d74\reactive-streams-1.0.0.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="14b8c877d98005ba3941c9257cfe09f6ed0e0d74">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\reactive-streams-1.0.0_8dc737fce8a4b114f687c909f219ad297d2aeadb.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.core\jackson-databind\2.3.2\c75edc740a6d8cb1cef6fa82fa594e0bce561916\jackson-databind-2.3.2.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="c75edc740a6d8cb1cef6fa82fa594e0bce561916">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\jackson-databind-2.3.2_4ca74e84286a5ffcb3f3d9ac8034334bf18e463b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="e3885783ff8926ed9e2fdcd16816c2e1e73e7aee">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\com.android.support-recyclerview-v7-23.2.1_b3c0a6ae9427ff5e63bc0d9c173228a049642bc0.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\org.springframework.android\spring-android-rest-template\1.0.1.RELEASE\e132d929bd181941f79b0d63edafb8a86ae6fd33\spring-android-rest-template-1.0.1.RELEASE.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="e132d929bd181941f79b0d63edafb8a86ae6fd33">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\spring-android-rest-template-1.0.1.RELEASE_6d0c4ad8ebfbf304cb9bfb8967e4f244c44bfd8c.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.0.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="d86429b0f0b3f3cafbeb78dda1b9d89119ccb05d">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\com.android.support-appcompat-v7-23.0.1_82e7fce0a8a1e3dd5fb8176f724aacb0ccf0067d.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.core\jackson-core\2.3.2\559b70ac8a0d5cad611da4223137a920147201ba\jackson-core-2.3.2.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="559b70ac8a0d5cad611da4223137a920147201ba">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\jackson-core-2.3.2_4005a56113c24df40868ef94ba0d8ca05d81e486.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\io.reactivex.rxjava2\rxjava\2.0.1\57f850a6b317e5582f1dbaff10a9e7d7e1fcdcfb\rxjava-2.0.1.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="57f850a6b317e5582f1dbaff10a9e7d7e1fcdcfb">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\rxjava-2.0.1_44a985d6cdf6bf4f0ef9170a3ee54b748184a7c7.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\io.reactivex.rxjava2\rxandroid\2.0.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="21d5aff81a43d20a14f82d653366c9b7a215071c">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\io.reactivex.rxjava2-rxandroid-2.0.0_bf2c52bfe444cfb84afeefafae5da001b26d2ae7.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\AppData\Local\Android\Sdk\extras\android\m2repository\com\android\support\support-annotations\23.2.1\support-annotations-23.2.1.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="ccb693bc0774fcb637246f7360de25b4af7df318">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\support-annotations-23.2.1_44381be9deeaa1888974961b628e49eb55f85669.jar" />
+    </item>
+    <item
+        jar="C:\Users\Sander\.gradle\caches\modules-2\files-2.1\org.springframework.android\spring-android-core\1.0.1.RELEASE\e68f0e8e4b636ee30c4de58953be38d9b72a5e3b\spring-android-core-1.0.1.RELEASE.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="e68f0e8e4b636ee30c4de58953be38d9b72a5e3b">
+        <dex dex="C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\pre-dexed\debug\spring-android-core-1.0.1.RELEASE_2e416526bf4a8ffaf6337419ae496861816906ad.jar" />
+    </item>
+
+</items>

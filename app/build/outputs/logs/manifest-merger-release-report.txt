@@ -94,6 +94,7 @@ MERGED from [com.android.support:appcompat-v7:23.0.1] C:\Users\Sander\Documents\
 MERGED from [com.android.support:support-v4:23.2.1] C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.2.1\AndroidManifest.xml:20:5-43
 MERGED from [com.android.support:recyclerview-v7:23.2.1] C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.2.1\AndroidManifest.xml:20:5-43
 MERGED from [com.android.support:support-v4:23.2.1] C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.2.1\AndroidManifest.xml:20:5-43
+MERGED from [io.reactivex.rxjava2:rxandroid:2.0.0] C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\build\intermediates\exploded-aar\io.reactivex.rxjava2\rxandroid\2.0.0\AndroidManifest.xml:19:5-43
 	android:targetSdkVersion
 		INJECTED from C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\src\main\AndroidManifest.xml
 		INJECTED from C:\Users\Sander\Documents\Aplicaciones\AndroidApps\MaximusMovies\app\src\main\AndroidManifest.xml
